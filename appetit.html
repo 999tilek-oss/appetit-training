@@ -411,4 +411,82 @@
         });
     </script>
 </body>
+<script>
+    // Переключение вкладок
+    function changeTab(tabName) {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        document.querySelectorAll('.content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        document.getElementById(tabName).classList.add('active');
+        document.querySelector(`button[onclick="changeTab('${tabName}')"]`).classList.add('active');
+    }
+
+    // Выбор должности
+    function selectRole(role) {
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        const selectedCard = document.querySelector(`.role-card[onclick="selectRole('${role}')"]`);
+        selectedCard.classList.add('selected');
+
+        document.getElementById('startBtn').disabled = false;
+    }
+
+    // Выбор филиала
+    function selectBranch(branch) {
+        document.querySelectorAll('.branches-list li').forEach(item => {
+            item.classList.remove('selected');
+        });
+
+        const selectedBranch = document.querySelector(`.branches-list li[onclick="selectBranch('${branch}')"]`);
+        selectedBranch.classList.add('selected');
+
+        document.getElementById('startBtn').disabled = false;
+
+        // Вставка бонусов
+        showBonuses(branch);
+    }
+
+    // Функция для отображения бонусов
+    function showBonuses(branch) {
+        const bonusesContainer = document.getElementById('bonuses');
+        bonusesContainer.innerHTML = ''; // Очищаем предыдущие бонусы
+
+        let bonusesText = '';
+
+        if (branch === 'notatorova') {
+            bonusesText = '<h3>Бонусы для филиала Новаторова 18/2:</h3><ul><li>Дневная смена: бонусы с 10:00 до 18:00.</li><li>Ночная смена: бонусы с 2:00 до 10:00.</li><li>Выручка и бонусы по сменам.</li></ul>';
+        } else if (branch === 'satpaeva') {
+            bonusesText = '<h3>Бонусы для филиала Сатпаева 8а:</h3><ul><li>Дневная смена: бонусы с 10:00 до 18:00.</li><li>Ночная смена: бонусы с 2:00 до 10:00.</li><li>Выручка и бонусы по сменам.</li></ul>';
+        } else if (branch === 'kazakhstan') {
+            bonusesText = '<h3>Бонусы для филиалов Казахстан 70а и Кабанбай батыр 148:</h3><ul><li>Бонусы при 1 сотруднике в смене.</li><li>Выручка и бонусы по сменам.</li></ul>';
+        } else if (branch === 'nazarbayeva') {
+            bonusesText = '<h3>Бонусы для филиала Назарбаева 28а:</h3><ul><li>Бонусы при 1.5 сотрудниках.</li><li>Выручка и бонусы по сменам.</li></ul>';
+        } else if (branch === 'zhiybek') {
+            bonusesText = '<h3>Бонусы для филиала Жибек Жолы 1 к8:</h3><ul><li>Бонусы при 2 сотрудниках.</li><li>Выручка и бонусы по сменам.</li></ul>';
+        }
+
+        bonusesContainer.innerHTML = bonusesText;  // Выводим бонусы
+    }
+
+    // Обработчик для кнопки
+    document.getElementById('startBtn').addEventListener('click', function() {
+        const selectedCard = document.querySelector('.role-card.selected');
+        const selectedBranch = document.querySelector('.branches-list li.selected');
+        if (selectedCard) {
+            const roleName = selectedCard.querySelector('h3').textContent;
+            alert('Начинаем обучение для: ' + roleName);
+        }
+        if (selectedBranch) {
+            const branchName = selectedBranch.textContent;
+            alert('Выбран филиал: ' + branchName);
+        }
+    });
+</script>
 </html>
