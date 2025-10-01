@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>APPETIT - Система обучения</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f7f7f7; 
+            padding: 40px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            text-align: center;
+        }
+        .logo-container {
+            position: absolute;
+            right: 40px;
+            top: 40px;
+            text-align: right;
+        }
+        .logo-container img {
+            height: 70px;
+        }
+        .logo-subtitle {
+            font-size: 1.2em;
+            color: #E94A4E;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        h1 {
+            color: #E94A4E;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .tab {
+            padding: 12px 24px;
+            background: #E94A4E;
+            color: white;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            margin: 0 5px;
+            font-size: 1.1em;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .tab:hover {
+            background: #d8474b;
+            transform: scale(1.05);
+        }
+        .tab.active {
+            background: #C93C42;
+        }
+        .role-card { 
+            background: white; 
+            padding: 25px; 
+            margin: 15px; 
+            border-radius: 15px; 
+            cursor: pointer; 
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: inline-block;
+            width: 220px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .role-card.selected { 
+            border-color: #E94A4E; 
+            background: #FFF5F5;
+        }
+        .role-card div {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .role-card h3 {
+            font-size: 1.3em;
+            color: #333;
+        }
+        .role-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .btn { 
+            background: #E94A4E; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 25px; 
+            margin-top: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(233, 74, 78, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(233, 74, 78, 0.4);
+        }
+        .btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .content {
+            display: none;
+            text-align: left;
+            padding: 20px;
+            background-color: #f8f8f8;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+        }
+        .content.active {
+            display: block;
+        }
+
+        .branches-list, .roles-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        .branches-list li, .roles-list li {
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .branches-list li:hover, .roles-list li:hover {
+            background-color: #f1f1f1;
+        }
+
+        .branches-list li.selected, .roles-list li.selected {
+            background-color: #E94A4E;
+            color: white;
+        }
+
+        .role-cards-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Стили для карьерного плана */
+        .career-plan {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .career-stage {
+            background: linear-gradient(135deg, #FFF5F5, #FFFFFF);
+            border-left: 5px solid #E94A4E;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+        }
+
+        .career-stage h3 {
+            color: #E94A4E;
+            margin-bottom: 10px;
+        }
+
+        .income {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #61A35B;
+            margin: 10px 0;
+        }
+
+        .career-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #E94A4E;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            background: #61A35B;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-btn:hover {
+            background: #4F8A47;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <img src="логотип 9-апрель горизонтальный.png" alt="APPETIT">
+    </div>
+
+    <h1>Система обучения персонала</h1>
+
+    <!-- Вкладки сверху -->
+    <div class="tabs">
+        <button class="tab active" onclick="changeTab('instruction')">Должностная инструкция</button>
+        <button class="tab" onclick="changeTab('career')">Карьерный план</button>
+        <button class="tab" onclick="changeTab('motivation')">Система мотивации</button>
+        <button class="tab" onclick="changeTab('standards')">Стандарты</button>
+    </div>
+
+    <!-- Контент для вкладок -->
+    <div id="instruction" class="content active">
+        <h2>Должностная инструкция</h2>
+        <p>Информация о должностных инструкциях, обязанности и права сотрудников компании.</p>
+        <h3>Выберите должность для обучения:</h3>
+        <div class="role-cards-container roles-list">
+            <div class="role-card" onclick="selectRole('cashier')">
+                <div>💰</div>
+                <h3>Кассир</h3>
+                <p>Обслуживание клиентов и работа с кассой</p>
+            </div>
+
+            <div class="role-card" onclick="selectRole('manager')">
+                <div>👨‍💼</div>
+                <h3>Менеджер смены</h3>
+                <p>Управление командой и контроль качества</p>
+            </div>  
+
+            <div class="role-card" onclick="selectRole('distributor')">
+                <div>🥤</div>
+                <h3>Раздача</h3>
+                <p>Выдача заказов и контроль комплектности</p>
+            </div>
+
+            <div class="role-card" onclick="selectRole('assembler')">
+                <div>🌯</div>
+                <h3>Сборщик</h3>
+                <p>Сборка бургеров по стандартам</p>
+            </div>
+
+            <div class="role-card" onclick="selectRole('preparer')">
+                <div>🔪</div>
+                <h3>Заготовщик</h3>
+                <p>Подготовка ингредиентов</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="career" class="content">
+        <h2>📈 Карьерный план APPETIT</h2>
+        
+        <div class="career-plan">
+            <h3 style="color: #E94A4E; text-align: center;">Ваш путь от новичка до партнера</h3>
+            
+            <div class="career-grid">
+                <div class="career-stage">
+                    <h3>🚀 Старт: Заготовщик/Раздача</h3>
+                    <p><strong>Цель:</strong> освоить базовые стандарты компании</p>
+                    <p class="income">Доход: обучение</p>
+                    <p><strong>Срок:</strong> 2-4 недели</p>
+                    <p><strong>Критерии:</strong> работа без ошибок, понимание процессов</p>
+                </div>
+
+                <div class="career-stage">
+                    <h3>💼 Кассир/Сборщик блюд</h3>
+                    <p><strong>Цель:</strong> овладеть своей зоной, работать стабильно</p>
+                    <p class="income">Доход: 240,000 - 260,000 ₸</p>
+                    <p><strong>Срок:</strong> 1-2 месяца</p>
+                    <p><strong>Критерии:</strong> знание состава блюд, обучение новичков</p>
+                </div>
+
+                <div class="career-stage">
+                    <h3>👨‍💼 Менеджер смены</h3>
+                    <p><strong>Цель:</strong> управлять командой, контролировать качество</p>
+                    <p class="income">Доход: 300,000 - 550,000 ₸</p>
+                    <p><strong>Срок:</strong> 2-6 месяцев</p>
+                    <p><strong>Критерии:</strong> управление командой до 10 человек</p>
+                </div>
+
+                <div class="career-stage">
+                    <h3>🏆 Партнер</h3>
+                    <p><strong>Цель:</strong> управлять филиалом, получать долю от прибыли</p>
+                    <p class="income">Доход: 1,000,000+ ₸</p>
+                    <p><strong>Срок:</strong> 6-12 месяцев</p>
+                    <p><strong>Критерии:</strong> ответственность за филиал, развитие команды</p>
+                </div>
+            </div>
+
+            <!-- Если у вас есть PDF файл, раскомментируйте этот блок -->
+            <!--
+            <div style="margin-top: 30px; text-align: center;">
+                <h4>📋 Полная версия карьерного плана</h4>
+                <iframe src="Карьерный план (2).pdf" class="pdf-viewer"></iframe>
+                <br>
+                <a href="Карьерный план (2).pdf" download class="download-btn">
+                    📥 Скачать карьерный план (PDF)
+                </a>
+            </div>
+            -->
+        </div>
+    </div>
+
+    <div id="motivation" class="content">
+        <h2>Система мотивации</h2>
+        <h3>Выберите филиал:</h3>
+        <ul class="branches-list">
+            <li onclick="selectBranch('notatorova')">Нотаторова 18/2</li>
+            <li onclick="selectBranch('satpaeva')">Сатпаева 8а</li>
+            <li onclick="selectBranch('nazarbayeva')">Назарбаева 28а</li>
+            <li onclick="selectBranch('zhiybek')">Жибек Жолы 1 к8</li>
+            <li onclick="selectBranch('kazakhstan')">Казахстан 70а</li>
+            <li onclick="selectBranch('samarskoye')">Самарское 5/1</li>
+            <li onclick="selectBranch('kabanbai')">Кабанбай батыр 148</li>
+        </ul>
+    </div>
+
+    <div id="standards" class="content">
+        <h2>Стандарты</h2>
+        <p>Описание стандартов обслуживания, качества и работы компании.</p>
+    </div>
+
+    <br>
+    <button class="btn" id="startBtn" disabled>НАЧАТЬ</button>
+
+    <script>
+        // Переключение вкладок
+        function changeTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`button[onclick="changeTab('${tabName}')"]`).classList.add('active');
+        }
+
+        // Выбор должности
+        function selectRole(role) {
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            const selectedCard = document.querySelector(`.role-card[onclick="selectRole('${role}')"]`);
+            selectedCard.classList.add('selected');
+
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        // Выбор филиала
+        function selectBranch(branch) {
+            document.querySelectorAll('.branches-list li').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            const selectedBranch = document.querySelector(`.branches-list li[onclick="selectBranch('${branch}')"]`);
+            selectedBranch.classList.add('selected');
+
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        // Обработчик для кнопки
+        document.getElementById('startBtn').addEventListener('click', function() {
+            const selectedCard = document.querySelector('.role-card.selected');
+            const selectedBranch = document.querySelector('.branches-list li.selected');
+            if (selectedCard) {
+                const roleName = selectedCard.querySelector('h3').textContent;
+                alert('Начинаем обучение для: ' + roleName);
+            }
+            if (selectedBranch) {
+                const branchName = selectedBranch.textContent;
+                alert('Выбран филиал: ' + branchName);
+            }
+        });
+    </script>
+</body>
+</html>
