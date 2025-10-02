@@ -528,10 +528,59 @@
     </div>
 </div>
         
-    <div id="standards" class="content">
-        <h2>Стандарты</h2>
-        <p>Описание стандартов обслуживания, качества и работы компании.</p>
+<div id="standards" class="content">
+    <h2>Стандарты</h2>
+    <p>Выберите категорию стандартов для обучения:</p>
+    
+    <div class="role-cards-container">
+        <div class="role-card" onclick="selectStandard('cooking')">
+            <div>👨‍🍳</div>
+            <h3>Готовка</h3>
+            <p>Стандарты приготовления блюд</p>
+        </div>
+
+        <div class="role-card" onclick="selectStandard('cleaning')">
+            <div>🧹</div>
+            <h3>Уборка</h3>
+            <p>Стандарты чистоты и порядка</p>
+        </div>
+
+        <div class="role-card" onclick="selectStandard('preparation')">
+            <div>🥬</div>
+            <h3>Заготовка</h3>
+            <p>Стандарты подготовки ингредиентов</p>
+        </div>
+
+        <div class="role-card" onclick="selectStandard('appearance')">
+            <div>👔</div>
+            <h3>Внешний вид</h3>
+            <p>Стандарты униформы и внешнего вида</p>
+        </div>
+
+        <div class="role-card" onclick="selectStandard('cashier')">
+            <div>💳</div>
+            <h3>Обслуживание на кассе</h3>
+            <p>Стандарты работы с кассой</p>
+        </div>
+
+        <div class="role-card" onclick="selectStandard('distribution')">
+            <div>📦</div>
+            <h3>Раздача заказа</h3>
+            <p>Стандарты выдачи заказов</p>
+        </div>
     </div>
+    
+    <!-- Контейнер для просмотра стандартов (изначально скрыт) -->
+    <div id="standards-viewer-container" style="display: none; margin-top: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 id="standards-title" style="color: #E94A4E; margin: 0;"></h3>
+            <button onclick="closeStandardsViewer()" style="background: #666; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">✕ Закрыть</button>
+        </div>
+        <div id="standards-content" class="instruction-content">
+            <!-- Сюда будет вставляться содержимое стандартов -->
+        </div>
+    </div>
+</div>
 
     <br>
     <button class="btn" id="startBtn" disabled>ВЫБРАТЬ</button>
@@ -1307,6 +1356,22 @@ function showFinesTable() {
 document.getElementById('fines-overlay').addEventListener('click', function() {
     toggleFinesTable();
 });
+// Функция для выбора стандарта
+function selectStandard(standard) {
+    document.querySelectorAll('.role-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+
+    const selectedCard = document.querySelector(`.role-card[onclick="selectStandard('${standard}')"]`);
+    selectedCard.classList.add('selected');
+
+    document.getElementById('startBtn').disabled = false;
+}
+
+// Функция для закрытия просмотрщика стандартов
+function closeStandardsViewer() {
+    document.getElementById('standards-viewer-container').style.display = 'none';
+}
     </script>
 </body>
 <!-- Дисциплинарное взыскание -->
