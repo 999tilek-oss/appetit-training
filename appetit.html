@@ -17,48 +17,44 @@
             text-align: center;
         }
 .logo-container {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    text-align: right;
+    position: relative;
+    text-align: center;
+    margin-bottom: 20px;
+    width: 100%;
 }
 
 .logo-container img {
-    height: 50px;
-    max-width: 150px;
+    height: auto; /* Сохраняет пропорции */
+    max-width: 200px; /* Максимальная ширина */
+    width: auto; /* Автоматическая ширина для сохранения пропорций */
 }
 
 .logo-subtitle {
-    font-size: 0.9em;
+    font-size: 1em;
     color: #E94A4E;
     font-weight: bold;
     margin-top: 5px;
 }
 
-/* Для очень маленьких экранов */
-@media (max-width: 480px) {
+/* Медиа-запрос для десктопов */
+@media (min-width: 768px) {
     .logo-container {
-        position: relative;
-        right: auto;
-        top: auto;
-        text-align: center;
-        margin-bottom: 15px;
-    }
-    
-    body {
-        padding: 20px 15px;
-    }
-}
-
-/* Для планшетов */
-@media (max-width: 768px) and (min-width: 481px) {
-    .logo-container {
-        right: 20px;
-        top: 20px;
+        position: absolute;
+        right: 40px;
+        top: 40px;
+        text-align: right;
+        width: auto;
+        margin-bottom: 0;
     }
     
     .logo-container img {
-        height: 60px;
+        max-width: 250px; /* Увеличиваем максимальную ширину для десктопов */
+        height: auto; /* Сохраняем пропорции */
+    }
+    
+    .logo-subtitle {
+        font-size: 1.2em;
+        margin-top: 10px;
     }
 }
         h1 {
