@@ -35,7 +35,71 @@
     font-weight: bold;
     margin-top: 5px;
 }
+/* Стили для списка филиалов */
+.branches-list {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
 
+.branches-list li {
+    margin: 8px 0;
+    padding: 15px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    border: 2px solid #f0f0f0;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+.branches-list li:hover {
+    background-color: #FFF5F5;
+    border-color: #E94A4E;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(233, 74, 78, 0.2);
+}
+
+.branches-list li.selected {
+    background-color: #E94A4E;
+    color: white;
+    border-color: #E94A4E;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(233, 74, 78, 0.3);
+}
+
+/* Мобильная версия для списка филиалов */
+@media (max-width: 768px) {
+    .branches-list {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+    
+    .branches-list li {
+        padding: 12px 15px;
+        margin: 6px auto;
+        font-size: 1em;
+        max-width: 100%;
+        text-align: center;
+    }
+    
+    #motivation .content {
+        text-align: center;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    .branches-list li {
+        padding: 10px 12px;
+        font-size: 0.95em;
+        margin: 5px auto;
+    }
+}
 /* Исправления для мобильных устройств */
 @media (max-width: 768px) {
     body {
@@ -696,15 +760,15 @@
 <div id="motivation" class="content">
     <h2>Система мотивации</h2>
     <h3>Выберите филиал:</h3>
-    <ul class="branches-list">
-        <li onclick="selectBranch('novatorova')">Новаторова 18/2</li>
-        <li onclick="selectBranch('satpaeva')">Сатпаева 8а</li>
-        <li onclick="selectBranch('nazarbayeva')">Назарбаева 28а</li>
-        <li onclick="selectBranch('zhiybek')">Жибек Жолы 1 к8</li>
-        <li onclick="selectBranch('kazakhstan')">Казахстан 70а</li>
-        <li onclick="selectBranch('samarskoye')">Самарское 5/1</li>
-        <li onclick="selectBranch('kabanbai')">Кабанбай батыр 148</li>
-    </ul>
+<ul class="branches-list">
+    <li onclick="selectBranch('novatorova')">Новаторова 18/2</li>
+    <li onclick="selectBranch('satpaeva')">Сатпаева 8а</li>
+    <li onclick="selectBranch('nazarbayeva')">Назарбаева 28а</li>
+    <li onclick="selectBranch('zhiybek')">Жибек Жолы 1 к8</li>
+    <li onclick="selectBranch('kazakhstan')">Казахстан 70а</li>
+    <li onclick="selectBranch('samarskoye')">Самарское 5/1</li>
+    <li onclick="selectBranch('kabanbai')">Кабанбай батыр 148</li>
+</ul>
     
     <!-- Контейнер для таблицы мотивации (изначально скрыт) -->
     <div id="motivation-table-container" style="display: none; margin-top: 30px;">
@@ -770,6 +834,39 @@
     <button class="btn" id="startBtn" disabled>ВЫБРАТЬ</button>
 
     <script>
+    // Выбор филиала
+function selectBranch(branch) {
+    document.querySelectorAll('.branches-list li').forEach(item => {
+        item.classList.remove('selected');
+    });
+
+    const selectedBranch = document.querySelector(`.branches-list li[onclick="selectBranch('${branch}')"]`);
+    selectedBranch.classList.add('selected');
+
+    document.getElementById('startBtn').disabled = false;
+    
+    // На мобильных сразу показываем таблицу мотивации
+    if (isMobileDevice()) {
+        const branchName = selectedBranch.textContent;
+        showMotivationTable(branch, branchName);
+        smoothScrollTo(document.getElementById('motivation-table-container'));
+    }
+}
+
+// Функция проверки мобильного устройства
+function isMobileDevice() {
+    return window.innerWidth <= 768;
+}
+
+// Функция плавной прокрутки
+function smoothScrollTo(element) {
+    if (isMobileDevice()) {
+        element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+    }
+}
 // Объект с должностными инструкциями
 const jobInstructions = {
     'preparer': {
