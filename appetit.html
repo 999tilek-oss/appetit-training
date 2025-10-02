@@ -35,6 +35,10 @@
     font-weight: bold;
     margin-top: 5px;
 }
+/* Стиль для кнопки в мотивации */
+#motivationBtn {
+    display: none; /* Скрыта по умолчанию */
+}
 /* Стили для списка филиалов */
 .branches-list {
     list-style: none;
@@ -760,15 +764,18 @@
 <div id="motivation" class="content">
     <h2>Система мотивации</h2>
     <h3>Выберите филиал:</h3>
-<ul class="branches-list">
-    <li onclick="selectBranch('novatorova')">Новаторова 18/2</li>
-    <li onclick="selectBranch('satpaeva')">Сатпаева 8а</li>
-    <li onclick="selectBranch('nazarbayeva')">Назарбаева 28а</li>
-    <li onclick="selectBranch('zhiybek')">Жибек Жолы 1 к8</li>
-    <li onclick="selectBranch('kazakhstan')">Казахстан 70а</li>
-    <li onclick="selectBranch('samarskoye')">Самарское 5/1</li>
-    <li onclick="selectBranch('kabanbai')">Кабанбай батыр 148</li>
-</ul>
+    <ul class="branches-list">
+        <li onclick="selectBranch('novatorova')">Новаторова 18/2</li>
+        <li onclick="selectBranch('satpaeva')">Сатпаева 8а</li>
+        <li onclick="selectBranch('nazarbayeva')">Назарбаева 28а</li>
+        <li onclick="selectBranch('zhiybek')">Жибек Жолы 1 к8</li>
+        <li onclick="selectBranch('kazakhstan')">Казахстан 70а</li>
+        <li onclick="selectBranch('samarskoye')">Самарское 5/1</li>
+        <li onclick="selectBranch('kabanbai')">Кабанбай батыр 148</li>
+    </ul>
+    
+    <!-- Кнопка ВЫБРАТЬ для мотивации -->
+    <button class="btn" id="motivationBtn" disabled style="margin-top: 30px;">ВЫБРАТЬ</button>
     
     <!-- Контейнер для таблицы мотивации (изначально скрыт) -->
     <div id="motivation-table-container" style="display: none; margin-top: 30px;">
@@ -1652,6 +1659,64 @@ function selectStandard(standard) {
 // Функция для закрытия просмотрщика стандартов
 function closeStandardsViewer() {
     document.getElementById('standards-viewer-container').style.display = 'none';
+}
+// Обработчик для кнопки ВЫБРАТЬ в мотивации
+document.getElementById('motivationBtn').addEventListener('click', function() {
+    const selectedBranch = document.querySelector('.branches-list li.selected');
+    
+    if (selectedBranch) {
+        const branch = selectedBranch.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const branchName = selectedBranch.textContent;
+        showMotivationTable(branch, branchName);
+    } else {
+        alert('Пожалуйста, выберите филиал');
+    }
+});
+
+// Обновляем функцию selectBranch чтобы активировать кнопку
+function selectBranch(branch) {
+    document.querySelectorAll('.branches-list li').forEach(item => {
+        item.classList.remove('selected');
+    });
+
+    const selectedBranch = document.querySelector(`.branches-list li[onclick="selectBranch('${branch}')"]`);
+    selectedBranch.classList.add('selected');
+
+    // Активируем обе кнопки
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('motivationBtn').disabled = false;
+}
+
+// Обновляем функцию changeTab
+function changeTab(tabName) {
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    document.querySelectorAll('.content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    document.getElementById(tabName).classList.add('active');
+    document.querySelector(`button[onclick="changeTab('${tabName}')"]`).classList.add('active');
+
+    // Скрываем таблицу мотивации при переключении вкладок
+    document.getElementById('motivation-table-container').style.display = 'none';
+    
+    // Управляем видимостью кнопок
+    const startBtn = document.getElementById('startBtn');
+    const motivationBtn = document.getElementById('motivationBtn');
+    
+    if (tabName === 'motivation') {
+        startBtn.style.display = 'none';
+        motivationBtn.style.display = 'block';
+    } else if (tabName === 'career') {
+        startBtn.style.display = 'none';
+        motivationBtn.style.display = 'none';
+    } else {
+        startBtn.style.display = 'block';
+        motivationBtn.style.display = 'none';
+    }
 }
     </script>
 </body>
