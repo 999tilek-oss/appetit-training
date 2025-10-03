@@ -4,108 +4,6 @@
     <meta charset="UTF-8">
     <title>APPETIT - Система обучения</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #f7f7f7; 
-            padding: 40px;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            height: 100vh;
-            text-align: center;
-        }
-.logo-container {
-    position: relative;
-    text-align: right;
-    margin-bottom: 20px;
-    width: 100%;
-}
-
-.logo-container img {
-    height: 50px; /* Фиксированная высота */
-    width: auto; /* Ширина автоматически подстраивается под пропорции */
-    max-width: none; /* Убираем ограничение по ширине */
-}
-
-.logo-subtitle {
-    font-size: 1em;
-    color: #E94A4E;
-    font-weight: bold;
-    margin-top: 5px;
-}
-/* Стиль для кнопки в мотивации */
-#motivationBtn {
-    display: none; /* Скрыта по умолчанию */
-}
-/* Стили для списка филиалов */
-.branches-list {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-.branches-list li {
-    margin: 8px 0;
-    padding: 15px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: white;
-    border: 2px solid #f0f0f0;
-    font-size: 1.1em;
-    text-align: center;
-}
-
-.branches-list li:hover {
-    background-color: #FFF5F5;
-    border-color: #E94A4E;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(233, 74, 78, 0.2);
-}
-
-.branches-list li.selected {
-    background-color: #E94A4E;
-    color: white;
-    border-color: #E94A4E;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(233, 74, 78, 0.3);
-}
-
-/* Мобильная версия для списка филиалов */
-@media (max-width: 768px) {
-    .branches-list {
-        max-width: 100%;
-        padding: 0 10px;
-    }
-    
-    .branches-list li {
-        padding: 12px 15px;
-        margin: 6px auto;
-        font-size: 1em;
-        max-width: 100%;
-        text-align: center;
-    }
-    
-    #motivation .content {
-        text-align: center;
-    }
-}
-
-/* Для очень маленьких экранов */
-@media (max-width: 480px) {
-    .branches-list li {
-        padding: 10px 12px;
-        font-size: 0.95em;
-        margin: 5px auto;
-    }
-}
-/* Исправления для мобильных устройств */
-@media (max-width: 768px) {
     body {
         padding: 20px 15px;
         height: auto;
@@ -229,113 +127,6 @@
         font-size: 2em;
     }
 }
-    
-    .role-card h3 {
-        font-size: 1.1em;
-    }
-    
-    .role-card p {
-        font-size: 0.85em;
-    }
-    
-    .btn {
-        width: 90%;
-        max-width: 300px;
-        margin: 20px auto;
-        padding: 12px 25px;
-        font-size: 16px;
-        display: block;
-    }
-    
-    .fines-btn {
-        margin: 30px auto;
-        display: block;
-        width: 90%;
-        max-width: 300px;
-    }
-    
-    /* Исправление для списка филиалов */
-    .branches-list li {
-        padding: 12px 15px;
-        margin: 8px auto;
-        max-width: 300px;
-        text-align: center;
-    }
-}
-
-/* Для очень маленьких экранов */
-@media (max-width: 480px) {
-    h1 {
-        font-size: 1.6em;
-    }
-    
-    .tab {
-        font-size: 0.85em;
-        padding: 8px 12px;
-        min-width: 100%;
-    }
-    
-    .role-card {
-        padding: 15px 10px;
-    }
-    
-    .role-card div {
-        font-size: 2em;
-    }
-}
-        h1 {
-            color: #E94A4E;
-            font-size: 2.5em;
-            margin-bottom: 30px;
-        }
-        .tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-        .tab {
-            padding: 12px 24px;
-            background: #E94A4E;
-            color: white;
-            cursor: pointer;
-            border: none;
-            border-radius: 6px 6px 0 0;
-            margin: 0 5px;
-            font-size: 1.1em;
-            transition: background 0.3s ease, transform 0.3s ease;
-        }
-        .tab:hover {
-            background: #d8474b;
-            transform: scale(1.05);
-        }
-        .tab.active {
-            background: #C93C42;
-        }
-        .role-card { 
-            background: white; 
-            padding: 25px; 
-            margin: 15px; 
-            border-radius: 15px; 
-            cursor: pointer; 
-            border: 3px solid transparent;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: inline-block;
-            width: 220px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .role-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .role-card.selected { 
-            border-color: #E94A4E; 
-            background: #FFF5F5;
-        }
-        .role-card div {
-            font-size: 3em;
-            margin-bottom: 10px;
-        }
         .role-card h3 {
             font-size: 1.3em;
             color: #333;
@@ -774,12 +565,9 @@
         <li onclick="selectBranch('kabanbai')">Кабанбай батыр 148</li>
     </ul>
     
-    <!-- Кнопка ВЫБРАТЬ для мотивации -->
-    <button class="btn" id="motivationBtn" disabled style="margin-top: 30px;">ВЫБРАТЬ</button>
-    
-    <!-- Контейнер для таблицы мотивации -->
+    <!-- Контейнер для таблицы мотивации (изначально скрыт) -->
     <div id="motivation-table-container" style="display: none; margin-top: 30px;">
-        <!-- Сюда будет вставляться таблица -->
+        <!-- Сюда будет вставляться таблица при нажатии кнопки -->
     </div>
 </div>
         
@@ -841,39 +629,6 @@
     <button class="btn" id="startBtn" disabled>ВЫБРАТЬ</button>
 
     <script>
-    // Выбор филиала
-function selectBranch(branch) {
-    document.querySelectorAll('.branches-list li').forEach(item => {
-        item.classList.remove('selected');
-    });
-
-    const selectedBranch = document.querySelector(`.branches-list li[onclick="selectBranch('${branch}')"]`);
-    selectedBranch.classList.add('selected');
-
-    document.getElementById('startBtn').disabled = false;
-    
-    // На мобильных сразу показываем таблицу мотивации
-    if (isMobileDevice()) {
-        const branchName = selectedBranch.textContent;
-        showMotivationTable(branch, branchName);
-        smoothScrollTo(document.getElementById('motivation-table-container'));
-    }
-}
-
-// Функция проверки мобильного устройства
-function isMobileDevice() {
-    return window.innerWidth <= 768;
-}
-
-// Функция плавной прокрутки
-function smoothScrollTo(element) {
-    if (isMobileDevice()) {
-        element.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
-        });
-    }
-}
 // Объект с должностными инструкциями
 const jobInstructions = {
     'preparer': {
@@ -1659,64 +1414,6 @@ function selectStandard(standard) {
 // Функция для закрытия просмотрщика стандартов
 function closeStandardsViewer() {
     document.getElementById('standards-viewer-container').style.display = 'none';
-}
-// Обработчик для кнопки ВЫБРАТЬ в мотивации
-document.getElementById('motivationBtn').addEventListener('click', function() {
-    const selectedBranch = document.querySelector('.branches-list li.selected');
-    
-    if (selectedBranch) {
-        const branch = selectedBranch.getAttribute('onclick').match(/'([^']+)'/)[1];
-        const branchName = selectedBranch.textContent;
-        showMotivationTable(branch, branchName);
-    } else {
-        alert('Пожалуйста, выберите филиал');
-    }
-});
-
-// Обновляем функцию selectBranch чтобы активировать кнопку
-function selectBranch(branch) {
-    document.querySelectorAll('.branches-list li').forEach(item => {
-        item.classList.remove('selected');
-    });
-
-    const selectedBranch = document.querySelector(`.branches-list li[onclick="selectBranch('${branch}')"]`);
-    selectedBranch.classList.add('selected');
-
-    // Активируем обе кнопки
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('motivationBtn').disabled = false;
-}
-
-// Обновляем функцию changeTab
-function changeTab(tabName) {
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-
-    document.querySelectorAll('.content').forEach(content => {
-        content.classList.remove('active');
-    });
-    
-    document.getElementById(tabName).classList.add('active');
-    document.querySelector(`button[onclick="changeTab('${tabName}')"]`).classList.add('active');
-
-    // Скрываем таблицу мотивации при переключении вкладок
-    document.getElementById('motivation-table-container').style.display = 'none';
-    
-    // Управляем видимостью кнопок
-    const startBtn = document.getElementById('startBtn');
-    const motivationBtn = document.getElementById('motivationBtn');
-    
-    if (tabName === 'motivation') {
-        startBtn.style.display = 'none';
-        motivationBtn.style.display = 'block';
-    } else if (tabName === 'career') {
-        startBtn.style.display = 'none';
-        motivationBtn.style.display = 'none';
-    } else {
-        startBtn.style.display = 'block';
-        motivationBtn.style.display = 'none';
-    }
 }
     </script>
 </body>
