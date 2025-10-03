@@ -4,129 +4,86 @@
     <meta charset="UTF-8">
     <title>APPETIT - Система обучения</title>
     <style>
-    body {
-        padding: 20px 15px;
-        height: auto;
-        min-height: 100vh;
-    }
-    
-    .logo-container {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        text-align: right;
-        margin-bottom: 0;
-        width: auto;
-    }
-    
-    .logo-container img {
-        height: 40px;
-        max-width: 150px;
-    }
-    
-    h1 {
-        font-size: 1.8em;
-        margin-bottom: 20px;
-        line-height: 1.3;
-        margin-top: 50px; /* Добавляем отступ сверху чтобы не перекрывалось логотипом */
-    }
-    
-    .tabs {
-        flex-wrap: wrap;
-        gap: 5px;
-        margin-bottom: 20px;
-    }
-    
-    .tab {
-        padding: 10px 15px;
-        font-size: 0.9em;
-        margin: 2px;
-        flex: 1;
-        min-width: 45%;
-        text-align: center;
-    }
-    
-    .role-cards-container {
-        gap: 10px;
-        margin-top: 15px;
-    }
-    
-    .role-card {
-        width: 100%;
-        max-width: 300px;
-        margin: 5px auto;
-        padding: 20px 15px;
-    }
-    
-    .role-card div {
-        font-size: 2.5em;
-        margin-bottom: 8px;
-    }
-    
-    .role-card h3 {
-        font-size: 1.1em;
-    }
-    
-    .role-card p {
-        font-size: 0.85em;
-    }
-    
-    .btn {
-        width: 90%;
-        max-width: 300px;
-        margin: 20px auto;
-        padding: 12px 25px;
-        font-size: 16px;
-        display: block;
-    }
-    
-    .fines-btn {
-        margin: 30px auto;
-        display: block;
-        width: 90%;
-        max-width: 300px;
-    }
-    
-    /* Исправление для списка филиалов */
-    .branches-list li {
-        padding: 12px 15px;
-        margin: 8px auto;
-        max-width: 300px;
-        text-align: center;
-    }
-}
-
-/* Для очень маленьких экранов */
-@media (max-width: 480px) {
-    .logo-container {
-        right: 10px;
-        top: 10px;
-    }
-    
-    .logo-container img {
-        height: 35px;
-        max-width: 130px;
-    }
-    
-    h1 {
-        font-size: 1.6em;
-        margin-top: 45px;
-    }
-    
-    .tab {
-        font-size: 0.85em;
-        padding: 8px 12px;
-        min-width: 100%;
-    }
-    
-    .role-card {
-        padding: 15px 10px;
-    }
-    
-    .role-card div {
-        font-size: 2em;
-    }
-}
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f7f7f7; 
+            padding: 40px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            text-align: center;
+        }
+        .logo-container {
+            position: absolute;
+            right: 40px;
+            top: 40px;
+            text-align: right;
+        }
+        .logo-container img {
+            height: 70px;
+        }
+        .logo-subtitle {
+            font-size: 1.2em;
+            color: #E94A4E;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        h1 {
+            color: #E94A4E;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .tab {
+            padding: 12px 24px;
+            background: #E94A4E;
+            color: white;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            margin: 0 5px;
+            font-size: 1.1em;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .tab:hover {
+            background: #d8474b;
+            transform: scale(1.05);
+        }
+        .tab.active {
+            background: #C93C42;
+        }
+        .role-card { 
+            background: white; 
+            padding: 25px; 
+            margin: 15px; 
+            border-radius: 15px; 
+            cursor: pointer; 
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: inline-block;
+            width: 220px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .role-card.selected { 
+            border-color: #E94A4E; 
+            background: #FFF5F5;
+        }
+        .role-card div {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
         .role-card h3 {
             font-size: 1.3em;
             color: #333;
