@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Система обучения персонала</title>y
+    <title>Система обучения персонала</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #F7F7F7; min-height: 100vh; padding: 20px; }
@@ -558,10 +558,6 @@ function submitTest5() {
         function retryVideo5() { showSection('section-video5'); }
         function retryTest5() { test5Questions.forEach(q => { q.selected = undefined; }); startTest5(); }
 // Завершение обучения
-// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-// ВСЁ, ЧТО НИЖЕ — НОВАЯ ВЕРСИЯ (отправка в Google Таблицу + резерв в localStorage)
-// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwBCMAy8ayFsazpppRcLDzSfBdSXtKzW9YQYpxiQPpWXOFdPp_6hceZwm18055zzfs0mA/exec";
 
 function completeTraining() {
@@ -1255,8 +1251,6 @@ function closeErrorStatistics() {
     const modal = document.getElementById('error-statistics-modal');
     if (modal) modal.remove();
 }
-// URL вашего Web App — вставьте точно так
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwBCMAy8ayFsazpppRcLDzSfBdSXtKzW9YQYpxiQPpWXOFdPp_6hceZwm18055zzfs0mA/exec";        
  </script>
 </body>
 
