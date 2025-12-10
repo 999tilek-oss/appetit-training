@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Система обучения персонала</title>
+    <title>Система обучения персонала</title>y
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #F7F7F7; min-height: 100vh; padding: 20px; }
@@ -558,51 +558,61 @@ function submitTest5() {
         function retryVideo5() { showSection('section-video5'); }
         function retryTest5() { test5Questions.forEach(q => { q.selected = undefined; }); startTest5(); }
 // Завершение обучения
+// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+// ВСЁ, ЧТО НИЖЕ — НОВАЯ ВЕРСИЯ (отправка в Google Таблицу + резерв в localStorage)
+// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwBCMAy8ayFsazpppRcLDzSfBdSXtKzW9YQYpxiQPpWXOFdPp_6hceZwm18055zzfs0mA/exec";
+
 function completeTraining() {
     clearInterval(timerInterval);
-    const totalTime = trainingData.endTime - trainingData.startTime;
-    const hours = Math.floor(totalTime / 3600000);
-    const minutes = Math.floor((totalTime % 3600000) / 60000);
-    const seconds = Math.floor((totalTime % 60000) / 1000);
+    trainingData.endTime = new Date();
+
+    const totalTimeMs = trainingData.endTime - trainingData.startTime;
+    const hours = Math.floor(totalTimeMs / 3600000);
+    const minutes = Math.floor((totalTimeMs % 3600000) / 60000);
+    const seconds = Math.floor((totalTimeMs % 60000) / 1000);
+
+    // Обновляем финальный экран
     document.getElementById('final-start').textContent = trainingData.startTime.toLocaleString('ru-RU');
     document.getElementById('final-end').textContent = trainingData.endTime.toLocaleString('ru-RU');
     document.getElementById('total-time').textContent = `${hours} ч ${minutes} мин ${seconds} сек`;
     document.getElementById('completion-message').classList.add('active');
-    saveTrainingData();
-    
-    // Обнуляем счетчик ошибок для следующего пользователя
-    errorCounter = {
-        test1: 0,
-        test2: 0,
-        test3: 0,
-        test4: 0,
-        test5: 0,
-        total: 0
-    };
-}
-// Сохранение данных в localStorage
-function saveTrainingData() {
-    const allTrainings = JSON.parse(localStorage.getItem('trainingRecords') || '[]');
-    const record = { 
-        ...trainingData, 
-        startTime: trainingData.startTime.toISOString(), 
-        endTime: trainingData.endTime.toISOString(), 
-        completed: true,
-        // Сохраняем общее количество ошибок
+
+    // Отправляем в Google Таблицу
+    const payload = {
+        fullName: trainingData.fullName,
+        position: trainingData.position,
+        startTime: trainingData.startTime.toLocaleString('ru-RU'),
+        endTime: trainingData.endTime.toLocaleString('ru-RU'),
+        test1Score: trainingData.test1Score,
+        test2Score: trainingData.test2Score,
+        test3Score: trainingData.test3Score,
+        test4Score: trainingData.test4Score,
+        test5Score: trainingData.test5Score,
         totalErrors: errorCounter.total
     };
-    allTrainings.push(record);
+
+    fetch(WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    // Резервное сохранение в localStorage (на случай отсутствия интернета)
+    const allTrainings = JSON.parse(localStorage.getItem('trainingRecords') || '[]');
+    allTrainings.push({
+        ...trainingData,
+        endTime: trainingData.endTime.toISOString(),
+        totalTime: `${hours} ч ${minutes} мин ${seconds} сек`,
+        totalErrors: errorCounter.total,
+        completed: true
+    });
     localStorage.setItem('trainingRecords', JSON.stringify(allTrainings));
-    console.log('Данные обучения сохранены:', record);
-    
-    // Сохраняем детальную статистику ошибок
-    const errorStats = JSON.parse(localStorage.getItem('errorStats') || '{}');
-    errorStats[trainingData.fullName] = {
-        ...errorCounter,
-        timestamp: new Date().toISOString(),
-        position: trainingData.position
-    };
-    localStorage.setItem('errorStats', JSON.stringify(errorStats));
+
+    // Сброс счётчиков ошибок
+    errorCounter = { test1: 0, test2: 0, test3: 0, test4: 0, test5: 0, total: 0 };
 }
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
@@ -1245,8 +1255,11 @@ function closeErrorStatistics() {
     const modal = document.getElementById('error-statistics-modal');
     if (modal) modal.remove();
 }
+// URL вашего Web App — вставьте точно так
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwBCMAy8ayFsazpppRcLDzSfBdSXtKzW9YQYpxiQPpWXOFdPp_6hceZwm18055zzfs0mA/exec";        
  </script>
 </body>
 
 </html>
+
 
