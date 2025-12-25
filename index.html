@@ -110,7 +110,7 @@
                 </div>
                 <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите обучающее видео:</h2>
                 <div class="video-container">
-                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/lMB1eSj6I80" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/FUNWK35AGy8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
                 <div style="text-align: center; margin-top: 30px;">
                     <button class="btn-primary" onclick="startTest1()">Перейти к тесту</button>
@@ -190,7 +190,7 @@
                 </div>
                 <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите третье обучающее видео:</h2>
                 <div class="video-container">
-                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/lFMj2mgVNn0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/IEM_VoKW2Nw" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
                 <div style="text-align: center; margin-top: 30px;">
                     <button class="btn-primary" onclick="startTest3()">Перейти к тесту</button>
@@ -558,57 +558,51 @@ function submitTest5() {
         function retryVideo5() { showSection('section-video5'); }
         function retryTest5() { test5Questions.forEach(q => { q.selected = undefined; }); startTest5(); }
 // Завершение обучения
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwBCMAy8ayFsazpppRcLDzSfBdSXtKzW9YQYpxiQPpWXOFdPp_6hceZwm18055zzfs0mA/exec";
-
 function completeTraining() {
     clearInterval(timerInterval);
-    trainingData.endTime = new Date();
-
-    const totalTimeMs = trainingData.endTime - trainingData.startTime;
-    const hours = Math.floor(totalTimeMs / 3600000);
-    const minutes = Math.floor((totalTimeMs % 3600000) / 60000);
-    const seconds = Math.floor((totalTimeMs % 60000) / 1000);
-
-    // Обновляем финальный экран
+    const totalTime = trainingData.endTime - trainingData.startTime;
+    const hours = Math.floor(totalTime / 3600000);
+    const minutes = Math.floor((totalTime % 3600000) / 60000);
+    const seconds = Math.floor((totalTime % 60000) / 1000);
     document.getElementById('final-start').textContent = trainingData.startTime.toLocaleString('ru-RU');
     document.getElementById('final-end').textContent = trainingData.endTime.toLocaleString('ru-RU');
     document.getElementById('total-time').textContent = `${hours} ч ${minutes} мин ${seconds} сек`;
     document.getElementById('completion-message').classList.add('active');
-
-    // Отправляем в Google Таблицу
-    const payload = {
-        fullName: trainingData.fullName,
-        position: trainingData.position,
-        startTime: trainingData.startTime.toLocaleString('ru-RU'),
-        endTime: trainingData.endTime.toLocaleString('ru-RU'),
-        test1Score: trainingData.test1Score,
-        test2Score: trainingData.test2Score,
-        test3Score: trainingData.test3Score,
-        test4Score: trainingData.test4Score,
-        test5Score: trainingData.test5Score,
+    saveTrainingData();
+    
+    // Обнуляем счетчик ошибок для следующего пользователя
+    errorCounter = {
+        test1: 0,
+        test2: 0,
+        test3: 0,
+        test4: 0,
+        test5: 0,
+        total: 0
+    };
+}
+// Сохранение данных в localStorage
+function saveTrainingData() {
+    const allTrainings = JSON.parse(localStorage.getItem('trainingRecords') || '[]');
+    const record = { 
+        ...trainingData, 
+        startTime: trainingData.startTime.toISOString(), 
+        endTime: trainingData.endTime.toISOString(), 
+        completed: true,
+        // Сохраняем общее количество ошибок
         totalErrors: errorCounter.total
     };
-
-    fetch(WEB_APP_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-    });
-
-    // Резервное сохранение в localStorage (на случай отсутствия интернета)
-    const allTrainings = JSON.parse(localStorage.getItem('trainingRecords') || '[]');
-    allTrainings.push({
-        ...trainingData,
-        endTime: trainingData.endTime.toISOString(),
-        totalTime: `${hours} ч ${minutes} мин ${seconds} сек`,
-        totalErrors: errorCounter.total,
-        completed: true
-    });
+    allTrainings.push(record);
     localStorage.setItem('trainingRecords', JSON.stringify(allTrainings));
-
-    // Сброс счётчиков ошибок
-    errorCounter = { test1: 0, test2: 0, test3: 0, test4: 0, test5: 0, total: 0 };
+    console.log('Данные обучения сохранены:', record);
+    
+    // Сохраняем детальную статистику ошибок
+    const errorStats = JSON.parse(localStorage.getItem('errorStats') || '{}');
+    errorStats[trainingData.fullName] = {
+        ...errorCounter,
+        timestamp: new Date().toISOString(),
+        position: trainingData.position
+    };
+    localStorage.setItem('errorStats', JSON.stringify(errorStats));
 }
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
