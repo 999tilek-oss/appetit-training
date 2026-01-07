@@ -1,1253 +1,1183 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Система обучения персонала</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #F7F7F7; min-height: 100vh; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid #e0e0e0; }
-        .header { background: linear-gradient(135deg, #E94A4E 0%, #d63c40 100%); color: white; padding: 35px 30px; text-align: center; position: relative; overflow: hidden; }
-        .header::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.1; }
-        .header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 700; position: relative; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .header p { font-size: 1.2em; opacity: 0.9; position: relative; }
-        .content { padding: 40px; }
-        .section { display: none; animation: fadeIn 0.5s ease-in; }
-        .section.active { display: block; }
-        .user-info { background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 30px; border-left: 5px solid #E94A4E; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .user-info h2 { color: #E94A4E; margin-bottom: 10px; font-size: 1.5em; }
-        .user-info p { color: #666; font-size: 1.1em; }
-        .position-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 30px 0; }
-        .position-btn { padding: 20px 15px; border: 2px solid #e0e0e0; border-radius: 10px; background: white; cursor: pointer; transition: all 0.3s ease; font-size: 17px; font-weight: 600; color: #333; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 80px; }
-        .position-btn:hover { transform: translateY(-5px); border-color: #E94A4E; box-shadow: 0 10px 20px rgba(233, 74, 78, 0.15); }
-        .position-btn.selected { background: #E94A4E; color: white; border-color: #E94A4E; box-shadow: 0 5px 15px rgba(233, 74, 78, 0.3); }
-        .btn-primary { background: linear-gradient(to right, #E94A4E, #d63c40); color: white; border: none; padding: 16px 45px; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-block; margin-top: 20px; box-shadow: 0 4px 15px rgba(233, 74, 78, 0.3); }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(233, 74, 78, 0.4); background: linear-gradient(to right, #d63c40, #c53034); }
-        .btn-primary:disabled { background: #cccccc; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn-secondary { background: #F7F7F7; color: #E94A4E; border: 2px solid #E94A4E; padding: 14px 35px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-block; margin: 10px; }
-        .btn-secondary:hover { background: #E94A4E; color: white; }
-        .video-container { margin: 30px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; }
-        .test-container { background: #f8f9fa; padding: 30px; border-radius: 12px; margin: 30px 0; border: 1px solid #e0e0e0; }
-        .question { margin-bottom: 30px; padding-bottom: 25px; border-bottom: 1px solid #e0e0e0; }
-        .question:last-child { border-bottom: none; }
-        .question h3 { margin-bottom: 20px; color: #333; font-size: 1.3em; line-height: 1.4; }
-        .answers { display: grid; gap: 12px; }
-        .answer { background: white; padding: 18px 20px; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s ease; display: flex; align-items: center; gap: 15px; font-size: 1.05em; }
-        .answer:hover { border-color: #E94A4E; background: #fff5f5; transform: translateX(5px); }
-        .answer.selected { background: #E94A4E; color: white; border-color: #d63c40; box-shadow: 0 4px 12px rgba(233, 74, 78, 0.2); }
-        .answer-letter { width: 36px; height: 36px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; transition: all 0.3s ease; }
-        .answer.selected .answer-letter { background: white; color: #E94A4E; }
-        .progress-bar { height: 12px; background: #e0e0e0; border-radius: 6px; margin: 40px 0; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-        .progress { height: 100%; background: linear-gradient(to right, #E94A4E, #FFB700); width: 0%; transition: width 0.5s ease; border-radius: 6px; }
-        .completion-message { text-align: center; padding: 50px 40px; background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%); border-radius: 15px; margin: 30px 0; display: none; border: 2px dashed #E94A4E; }
-        .completion-message.active { display: block; animation: fadeIn 0.5s ease-in; }
-        .completion-message h2 { color: #E94A4E; margin-bottom: 25px; font-size: 2.2em; }
-        .completion-details { background: white; padding: 25px; border-radius: 12px; margin: 25px auto; max-width: 600px; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .completion-details p { margin: 15px 0; font-size: 1.1em; color: #333; display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
-        .completion-details p:last-child { border-bottom: none; }
-        .completion-details strong { color: #E94A4E; min-width: 200px; display: inline-block; }
-        .error-message { background: #fff5f5; border: 2px solid #ff4444; border-radius: 10px; padding: 25px; margin: 25px 0; text-align: center; color: #d63c40; }
-        .error-message h3 { color: #ff4444; margin-bottom: 15px; }
-        .retry-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-        .timer { position: fixed; top: 20px; right: 20px; background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); font-weight: 700; color: #E94A4E; border: 2px solid #E94A4E; z-index: 1000; font-size: 1.1em; display: flex; align-items: center; gap: 10px; }
-        .timer::before { content: '⏱️'; font-size: 1.2em; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .success-check { font-size: 4em; margin-bottom: 20px; animation: pulse 2s infinite; }
-        @media (max-width: 768px) { .content { padding: 25px; } .position-buttons { grid-template-columns: 1fr; } .header h1 { font-size: 1.8em; } .timer { top: 10px; right: 10px; padding: 12px 20px; font-size: 1em; } .completion-details p { flex-direction: column; gap: 5px; } .completion-details strong { min-width: auto; } }
-        @media (max-width: 480px) { .content { padding: 20px; } .header { padding: 25px 20px; } .question h3 { font-size: 1.2em; } .answer { padding: 15px; font-size: 1em; } .btn-primary, .btn-secondary { width: 100%; margin: 5px 0; } }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Система обучения персонала</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #F7F7F7; min-height: 100vh; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid #e0e0e0; }
+    .header { background: linear-gradient(135deg, #E94A4E 0%, #d63c40 100%); color: white; padding: 35px 30px; text-align: center; position: relative; overflow: hidden; }
+    .header::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.1; }
+    .header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 700; position: relative; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .header p { font-size: 1.2em; opacity: 0.9; position: relative; }
+    .content { padding: 40px; }
+    .section { display: none; animation: fadeIn 0.5s ease-in; }
+    .section.active { display: block; }
+    .user-info { background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 30px; border-left: 5px solid #E94A4E; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .user-info h2 { color: #E94A4E; margin-bottom: 10px; font-size: 1.5em; }
+    .user-info p { color: #666; font-size: 1.1em; }
+
+    .position-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 30px 0; }
+    .position-btn { padding: 20px 15px; border: 2px solid #e0e0e0; border-radius: 10px; background: white; cursor: pointer; transition: all 0.3s ease; font-size: 17px; font-weight: 600; color: #333; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 80px; }
+    .position-btn:hover { transform: translateY(-5px); border-color: #E94A4E; box-shadow: 0 10px 20px rgba(233, 74, 78, 0.15); }
+    .position-btn.selected { background: #E94A4E; color: white; border-color: #E94A4E; box-shadow: 0 5px 15px rgba(233, 74, 78, 0.3); }
+
+    .btn-primary { background: linear-gradient(to right, #E94A4E, #d63c40); color: white; border: none; padding: 16px 45px; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-block; margin-top: 20px; box-shadow: 0 4px 15px rgba(233, 74, 78, 0.3); }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(233, 74, 78, 0.4); background: linear-gradient(to right, #d63c40, #c53034); }
+    .btn-primary:disabled { background: #cccccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-secondary { background: #F7F7F7; color: #E94A4E; border: 2px solid #E94A4E; padding: 14px 35px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-block; margin: 10px; }
+    .btn-secondary:hover { background: #E94A4E; color: white; }
+
+    .video-container { margin: 30px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; }
+    .test-container { background: #f8f9fa; padding: 30px; border-radius: 12px; margin: 30px 0; border: 1px solid #e0e0e0; }
+
+    .question { margin-bottom: 30px; padding-bottom: 25px; border-bottom: 1px solid #e0e0e0; }
+    .question:last-child { border-bottom: none; }
+    .question h3 { margin-bottom: 20px; color: #333; font-size: 1.3em; line-height: 1.4; }
+
+    .answers { display: grid; gap: 12px; }
+    .answer { background: white; padding: 18px 20px; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s ease; display: flex; align-items: center; gap: 15px; font-size: 1.05em; }
+    .answer:hover { border-color: #E94A4E; background: #fff5f5; transform: translateX(5px); }
+    .answer.selected { background: #E94A4E; color: white; border-color: #d63c40; box-shadow: 0 4px 12px rgba(233, 74, 78, 0.2); }
+
+    .answer-letter { width: 36px; height: 36px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; transition: all 0.3s ease; }
+    .answer.selected .answer-letter { background: white; color: #E94A4E; }
+
+    .progress-bar { height: 12px; background: #e0e0e0; border-radius: 6px; margin: 20px 0 35px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+    .progress { height: 100%; background: linear-gradient(to right, #E94A4E, #FFB700); width: 0%; transition: width 0.5s ease; border-radius: 6px; }
+
+    .completion-message { text-align: center; padding: 50px 40px; background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%); border-radius: 15px; margin: 30px 0; display: none; border: 2px dashed #E94A4E; }
+    .completion-message.active { display: block; animation: fadeIn 0.5s ease-in; }
+    .completion-message h2 { color: #E94A4E; margin-bottom: 25px; font-size: 2.2em; }
+
+    .completion-details { background: white; padding: 25px; border-radius: 12px; margin: 25px auto; max-width: 600px; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .completion-details p { margin: 15px 0; font-size: 1.1em; color: #333; display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+    .completion-details p:last-child { border-bottom: none; }
+    .completion-details strong { color: #E94A4E; min-width: 220px; display: inline-block; }
+
+    .error-message { background: #fff5f5; border: 2px solid #ff4444; border-radius: 10px; padding: 25px; margin: 25px 0; text-align: center; color: #d63c40; }
+    .error-message h3 { color: #ff4444; margin-bottom: 15px; }
+    .retry-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+
+    .timer { position: fixed; top: 20px; right: 20px; background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); font-weight: 700; color: #E94A4E; border: 2px solid #E94A4E; z-index: 1000; font-size: 1.1em; display: flex; align-items: center; gap: 10px; }
+    .timer::before { content: '⏱️'; font-size: 1.2em; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+    .success-check { font-size: 4em; margin-bottom: 20px; animation: pulse 2s infinite; }
+
+    @media (max-width: 768px) {
+      .content { padding: 25px; }
+      .position-buttons { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.8em; }
+      .timer { top: 10px; right: 10px; padding: 12px 20px; font-size: 1em; }
+      .completion-details p { flex-direction: column; gap: 5px; }
+      .completion-details strong { min-width: auto; }
+    }
+    @media (max-width: 480px) {
+      .content { padding: 20px; }
+      .header { padding: 25px 20px; }
+      .question h3 { font-size: 1.2em; }
+      .answer { padding: 15px; font-size: 1em; }
+      .btn-primary, .btn-secondary { width: 100%; margin: 5px 0; }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="timer" id="timer">00:00:00</div>
-    <div class="container">
-        <div class="header">
-            <h1>Система обучения персонала</h1>
-            <p>Прохождение обязательного обучения</p>
+  <div class="timer" id="timer">00:00:00</div>
+
+  <div class="container">
+    <div class="header">
+      <h1>Система обучения персонала</h1>
+      <p>Прохождение обязательного обучения</p>
+    </div>
+
+    <div class="content">
+      <!-- Этап 1: Ввод ФИО -->
+      <div class="section active" id="section-name">
+        <div class="user-info">
+          <h2>Введите ваши данные</h2>
+          <p>Пожалуйста, введите ваше ФИО для начала обучения</p>
         </div>
-        <div class="content">
-            <!-- Этап 1: Ввод ФИО -->
-            <div class="section active" id="section-name">
-                <div class="user-info">
-                    <h2>Введите ваши данные</h2>
-                    <p>Пожалуйста, введите ваше ФИО для начала обучения</p>
-                </div>
-                <form id="name-form" onsubmit="event.preventDefault(); saveName();">
-                    <div style="margin: 30px 0;">
-                        <input type="text" id="full-name" placeholder="Ваш ФИО" style="width: 100%; padding: 18px 20px; font-size: 18px; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s ease;" onfocus="this.style.borderColor='#E94A4E'; this.style.boxShadow='0 0 0 3px rgba(233, 74, 78, 0.1)';" onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='none';">
-                    </div>
-                    <div style="text-align: center;">
-                        <button type="submit" class="btn-primary">Начать обучение</button>
-                    </div>
-                </form>
-            </div>
+        <form id="name-form" onsubmit="event.preventDefault(); saveName();">
+          <div style="margin: 30px 0;">
+            <input type="text" id="full-name" placeholder="Ваш ФИО"
+              style="width: 100%; padding: 18px 20px; font-size: 18px; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s ease;"
+              onfocus="this.style.borderColor='#E94A4E'; this.style.boxShadow='0 0 0 3px rgba(233, 74, 78, 0.1)';"
+              onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='none';">
+          </div>
+          <div style="text-align: center;">
+            <button type="submit" class="btn-primary">Начать обучение</button>
+          </div>
+        </form>
+      </div>
 
-<!-- Этап 2: Выбор должности — только Сборщик работает -->
-<div class="section" id="section-position">
-    <div class="user-info">
-        <h2 id="user-greeting"></h2>
-        <p id="start-time"></p>
-    </div>
-    <h2 style="color: #333; margin-bottom: 20px; font-size: 1.8em;">Выберите вашу должность:</h2>
-    <div class="position-buttons">
-        <button class="position-btn disabled-btn" data-position="Кассир" disabled>Кассир</button>
-        <button class="position-btn" data-position="Сборщик" id="sborshchik-btn">Сборщик</button>
-        <button class="position-btn disabled-btn" data-position="Менеджер смены" disabled>Менеджер смены</button>
-        <button class="position-btn disabled-btn" data-position="Раздача" disabled>Раздача</button>
-        <button class="position-btn disabled-btn" data-position="Курьер" disabled>Курьер</button>
-    </div>
-    <div style="text-align: center;">
-        <button id="select-position-btn" class="btn-primary" disabled onclick="selectPosition()">Выбрать должность</button>
-    </div>
-</div>
-
-            <!-- Этап 3: Первое видео -->
-            <div class="section" id="section-video1">
-                <div class="user-info">
-                    <h2>Обучение для должности: <span id="current-position"></span></h2>
-                    <p>Сотрудник: <span id="current-user"></span></p>
-                </div>
-                <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите обучающее видео:</h2>
-                <div class="video-container">
-                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/FUNWK35AGy8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <button class="btn-primary" onclick="startTest1()">Перейти к тесту</button>
-                </div>
-            </div>
-
-            <!-- Этап 4: Первый тест -->
-            <div class="section" id="section-test1">
-                <div class="test-container">
-                    <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №1</h2>
-                    <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Пожалуйста, ответьте на вопросы. Для успешного прохождения необходимо правильно ответить на все вопросы.</p>
-                    <div class="progress-bar">
-                        <div class="progress" id="test1-progress"></div>
-                    </div>
-                    <div id="test1-questions"></div>
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button id="submit-test1" class="btn-primary" onclick="submitTest1()" disabled>Проверить ответы</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Сообщение об ошибке теста 1 -->
-            <div id="test1-error" class="error-message" style="display: none;">
-                <h3>❌ Тест не пройден</h3>
-                <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
-                <div class="retry-buttons">
-                    <button class="btn-secondary" onclick="retryVideo1()">Смотреть видео заново</button>
-                    <button class="btn-primary" onclick="retryTest1()">Пройти тест еще раз</button>
-                </div>
-            </div>
-
-            <!-- Этап 5: Второе видео -->
-            <div class="section" id="section-video2">
-                <div class="user-info">
-                    <h2>Продолжение обучения</h2>
-                    <p>Первый тест успешно пройден</p>
-                </div>
-                <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите второе обучающее видео:</h2>
-                <div class="video-container">
-                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/EwXtuZ8qswc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <button class="btn-primary" onclick="startTest2()">Перейти к тесту</button>
-                </div>
-            </div>
-
-            <!-- Этап 6: Второй тест -->
-            <div class="section" id="section-test2">
-                <div class="test-container">
-                    <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №2</h2>
-                    <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Ответьте на вопросы второго теста</p>
-                    <div class="progress-bar">
-                        <div class="progress" id="test2-progress"></div>
-                    </div>
-                    <div id="test2-questions"></div>
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button id="submit-test2" class="btn-primary" onclick="submitTest2()" disabled>Проверить ответы</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Сообщение об ошибке теста 2 -->
-            <div id="test2-error" class="error-message" style="display: none;">
-                <h3>❌ Тест не пройден</h3>
-                <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
-                <div class="retry-buttons">
-                    <button class="btn-secondary" onclick="retryVideo2()">Смотреть видео заново</button>
-                    <button class="btn-primary" onclick="retryTest2()">Пройти тест еще раз</button>
-                </div>
-            </div>
-
-            <!-- Этап 7: Третье видео (добавлено) -->
-            <div class="section" id="section-video3">
-                <div class="user-info">
-                    <h2>Продолжение обучения</h2>
-                    <p>Второй тест успешно пройден</p>
-                </div>
-                <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите третье обучающее видео:</h2>
-                <div class="video-container">
-                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/IEM_VoKW2Nw" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <button class="btn-primary" onclick="startTest3()">Перейти к тесту</button>
-                </div>
-            </div>
-
-            <!-- Этап 8: Третий тест (добавлено) -->
-            <div class="section" id="section-test3">
-                <div class="test-container">
-                    <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №3</h2>
-                    <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Ответьте на вопросы третьего теста</p>
-                    <div class="progress-bar">
-                        <div class="progress" id="test3-progress"></div>
-                    </div>
-                    <div id="test3-questions"></div>
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button id="submit-test3" class="btn-primary" onclick="submitTest3()" disabled>Проверить ответы</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Сообщение об ошибке теста 3 (добавлено) -->
-            <div id="test3-error" class="error-message" style="display: none;">
-                <h3>❌ Тест не пройден</h3>
-                <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
-                <div class="retry-buttons">
-                    <button class="btn-secondary" onclick="retryVideo3()">Смотреть видео заново</button>
-                    <button class="btn-primary" onclick="retryTest3()">Пройти тест еще раз</button>
-                </div>
-            </div>
-
-            <!-- Этап 9: Четвертое видео (добавлено) -->
-            <div class="section" id="section-video4">
-                <div class="user-info">
-                    <h2>Продолжение обучения</h2>
-                    <p>Третий тест успешно пройден</p>
-                </div>
-                <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите четвертое обучающее видео:</h2>
-                <div class="video-container">
-                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/L03s4sDC8KA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <button class="btn-primary" onclick="startTest4()">Перейти к тесту</button>
-                </div>
-            </div>
-
-            <!-- Этап 10: Четвертый тест (добавлено) -->
-            <div class="section" id="section-test4">
-                <div class="test-container">
-                    <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №4</h2>
-                    <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Ответьте на вопросы четвертого теста</p>
-                    <div class="progress-bar">
-                        <div class="progress" id="test4-progress"></div>
-                    </div>
-                    <div id="test4-questions"></div>
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button id="submit-test4" class="btn-primary" onclick="submitTest4()" disabled>Проверить ответы</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Сообщение об ошибке теста 4 (добавлено) -->
-            <div id="test4-error" class="error-message" style="display: none;">
-                <h3>❌ Тест не пройден</h3>
-                <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
-                <div class="retry-buttons">
-                    <button class="btn-secondary" onclick="retryVideo4()">Смотреть видео заново</button>
-                    <button class="btn-primary" onclick="retryTest4()">Пройти тест еще раз</button>
-                </div>
-            </div>
-
-            <!-- Этап 11: Пятое видео (добавлено) -->
-            <div class="section" id="section-video5">
-                <div class="user-info">
-                    <h2>Продолжение обучения</h2>
-                    <p>Четвертый тест успешно пройден</p>
-                </div>
-                <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите пятое обучающее видео:</h2>
-                <div class="video-container">
-                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/S2GQVPNhyt8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <button class="btn-primary" onclick="startTest5()">Перейти к тесту</button>
-                </div>
-            </div>
-
-            <!-- Этап 12: Пятый тест (добавлено) -->
-            <div class="section" id="section-test5">
-                <div class="test-container">
-                    <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №5</h2>
-                    <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Ответьте на вопросы пятого теста</p>
-                    <div class="progress-bar">
-                        <div class="progress" id="test5-progress"></div>
-                    </div>
-                    <div id="test5-questions"></div>
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button id="submit-test5" class="btn-primary" onclick="submitTest5()" disabled>Завершить обучение</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Сообщение об ошибке теста 5 (добавлено) -->
-            <div id="test5-error" class="error-message" style="display: none;">
-                <h3>❌ Тест не пройден</h3>
-                <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
-                <div class="retry-buttons">
-                    <button class="btn-secondary" onclick="retryVideo5()">Смотреть видео заново</button>
-                    <button class="btn-primary" onclick="retryTest5()">Пройти тест еще раз</button>
-                </div>
-            </div>
-
-            <!-- Завершение (обновлено для показа после 5-го теста) -->
-            <div class="completion-message" id="completion-message">
-                <div class="success-check">🎉</div>
-                <h2>Обучение успешно завершено!</h2>
-                <div class="completion-details">
-                    <p><strong>Сотрудник:</strong> <span id="final-user"></span></p>
-                    <p><strong>Должность:</strong> <span id="final-position"></span></p>
-                    <p><strong>Дата и время начала:</strong> <span id="final-start"></span></p>
-                    <p><strong>Дата и время завершения:</strong> <span id="final-end"></span></p>
-                    <p><strong>Общее время обучения:</strong> <span id="total-time"></span></p>
-                </div>
-                <p style="font-size: 1.1em; color: #666; margin-top: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">Результаты обучения сохранены в системе. Поздравляем с успешным прохождением обучения!</p>
-            </div>
+      <!-- Этап 2: Выбор должности -->
+      <div class="section" id="section-position">
+        <div class="user-info">
+          <h2 id="user-greeting"></h2>
+          <p id="start-time"></p>
         </div>
+
+        <h2 style="color: #333; margin-bottom: 20px; font-size: 1.8em;">Выберите вашу должность:</h2>
+
+        <div class="position-buttons">
+          <button class="position-btn" data-position="Кассир">Кассир</button>
+          <button class="position-btn" data-position="Сборщик">Сборщик</button>
+          <button class="position-btn" data-position="Менеджер смены" disabled>Менеджер смены</button>
+          <button class="position-btn" data-position="Раздача" disabled>Раздача</button>
+          <button class="position-btn" data-position="Курьер" disabled>Курьер</button>
+        </div>
+
+        <div style="text-align: center;">
+          <button id="select-position-btn" class="btn-primary" disabled onclick="selectPosition()">Выбрать должность</button>
+        </div>
+      </div>
+
+      <!-- ==========================================================
+           КАССИР: Универсальные секции (19 видео -> тест -> далее)
+           ========================================================== -->
+
+      <div class="section" id="section-cashier-video">
+        <div class="user-info">
+          <h2>Обучение для должности: <span id="cashier-position"></span></h2>
+          <p>Сотрудник: <span id="cashier-user"></span></p>
+          <p style="margin-top: 10px; color:#666;">
+            Модуль: <strong id="cashier-module-num"></strong> / <strong id="cashier-module-total"></strong>
+          </p>
+        </div>
+
+        <h2 style="color: #333; margin-bottom: 10px; font-size: 1.8em;" id="cashier-module-title"></h2>
+        <p style="color:#666; margin-bottom: 20px;">Просмотрите видео, затем перейдите к тесту.</p>
+
+        <div class="video-container">
+          <iframe id="cashier-video-iframe" width="100%" height="500"
+            src=""
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+          <button class="btn-primary" onclick="cashierGoToTest()">Перейти к тесту</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-cashier-test">
+        <div class="test-container">
+          <h2 style="color: #E94A4E; margin-bottom: 10px; font-size: 2em;" id="cashier-test-title"></h2>
+          <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">
+            Для успешного прохождения необходимо правильно ответить на все вопросы.
+          </p>
+
+          <div class="progress-bar">
+            <div class="progress" id="cashier-test-progress"></div>
+          </div>
+
+          <div id="cashier-test-questions"></div>
+
+          <div style="text-align: center; margin-top: 30px;">
+            <button id="submit-cashier-test" class="btn-primary" onclick="submitCashierTest()" disabled>Проверить ответы</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="cashier-test-error" class="error-message" style="display: none;">
+        <h3>❌ Тест не пройден</h3>
+        <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
+        <div class="retry-buttons">
+          <button class="btn-secondary" onclick="cashierRetryVideo()">Смотреть видео заново</button>
+          <button class="btn-primary" onclick="cashierRetryTest()">Пройти тест еще раз</button>
+        </div>
+      </div>
+
+      <!-- ==========================================================
+           СБОРЩИК: ваш текущий путь (5 видео/5 тестов)
+           ========================================================== -->
+
+      <div class="section" id="section-video1">
+        <div class="user-info">
+          <h2>Обучение для должности: <span id="current-position"></span></h2>
+          <p>Сотрудник: <span id="current-user"></span></p>
+        </div>
+        <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите обучающее видео:</h2>
+        <div class="video-container">
+          <iframe width="100%" height="500" src="https://www.youtube.com/embed/lMB1eSj6I80" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <button class="btn-primary" onclick="startTest1()">Перейти к тесту</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-test1">
+        <div class="test-container">
+          <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №1</h2>
+          <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Пожалуйста, ответьте на вопросы. Для успешного прохождения необходимо правильно ответить на все вопросы.</p>
+          <div class="progress-bar"><div class="progress" id="test1-progress"></div></div>
+          <div id="test1-questions"></div>
+          <div style="text-align: center; margin-top: 30px;">
+            <button id="submit-test1" class="btn-primary" onclick="submitTest1()" disabled>Проверить ответы</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="test1-error" class="error-message" style="display: none;">
+        <h3>❌ Тест не пройден</h3>
+        <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
+        <div class="retry-buttons">
+          <button class="btn-secondary" onclick="retryVideo1()">Смотреть видео заново</button>
+          <button class="btn-primary" onclick="retryTest1()">Пройти тест еще раз</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-video2">
+        <div class="user-info">
+          <h2>Продолжение обучения</h2>
+          <p>Первый тест успешно пройден</p>
+        </div>
+        <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите второе обучающее видео:</h2>
+        <div class="video-container">
+          <iframe width="100%" height="500" src="https://www.youtube.com/embed/EwXtuZ8qswc" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <button class="btn-primary" onclick="startTest2()">Перейти к тесту</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-test2">
+        <div class="test-container">
+          <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №2</h2>
+          <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Ответьте на вопросы второго теста</p>
+          <div class="progress-bar"><div class="progress" id="test2-progress"></div></div>
+          <div id="test2-questions"></div>
+          <div style="text-align: center; margin-top: 30px;">
+            <button id="submit-test2" class="btn-primary" onclick="submitTest2()" disabled>Проверить ответы</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="test2-error" class="error-message" style="display: none;">
+        <h3>❌ Тест не пройден</h3>
+        <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
+        <div class="retry-buttons">
+          <button class="btn-secondary" onclick="retryVideo2()">Смотреть видео заново</button>
+          <button class="btn-primary" onclick="retryTest2()">Пройти тест еще раз</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-video3">
+        <div class="user-info">
+          <h2>Продолжение обучения</h2>
+          <p>Второй тест успешно пройден</p>
+        </div>
+        <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите третье обучающее видео:</h2>
+        <div class="video-container">
+          <iframe width="100%" height="500" src="https://www.youtube.com/embed/lFMj2mgVNn0" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <button class="btn-primary" onclick="startTest3()">Перейти к тесту</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-test3">
+        <div class="test-container">
+          <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №3</h2>
+          <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Ответьте на вопросы третьего теста</p>
+          <div class="progress-bar"><div class="progress" id="test3-progress"></div></div>
+          <div id="test3-questions"></div>
+          <div style="text-align: center; margin-top: 30px;">
+            <button id="submit-test3" class="btn-primary" onclick="submitTest3()" disabled>Проверить ответы</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="test3-error" class="error-message" style="display: none;">
+        <h3>❌ Тест не пройден</h3>
+        <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
+        <div class="retry-buttons">
+          <button class="btn-secondary" onclick="retryVideo3()">Смотреть видео заново</button>
+          <button class="btn-primary" onclick="retryTest3()">Пройти тест еще раз</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-video4">
+        <div class="user-info">
+          <h2>Продолжение обучения</h2>
+          <p>Третий тест успешно пройден</p>
+        </div>
+        <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите четвертое обучающее видео:</h2>
+        <div class="video-container">
+          <iframe width="100%" height="500" src="https://www.youtube.com/embed/L03s4sDC8KA" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <button class="btn-primary" onclick="startTest4()">Перейти к тесту</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-test4">
+        <div class="test-container">
+          <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №4</h2>
+          <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Ответьте на вопросы четвертого теста</p>
+          <div class="progress-bar"><div class="progress" id="test4-progress"></div></div>
+          <div id="test4-questions"></div>
+          <div style="text-align: center; margin-top: 30px;">
+            <button id="submit-test4" class="btn-primary" onclick="submitTest4()" disabled>Проверить ответы</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="test4-error" class="error-message" style="display: none;">
+        <h3>❌ Тест не пройден</h3>
+        <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
+        <div class="retry-buttons">
+          <button class="btn-secondary" onclick="retryVideo4()">Смотреть видео заново</button>
+          <button class="btn-primary" onclick="retryTest4()">Пройти тест еще раз</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-video5">
+        <div class="user-info">
+          <h2>Продолжение обучения</h2>
+          <p>Четвертый тест успешно пройден</p>
+        </div>
+        <h2 style="color: #333; margin-bottom: 25px; font-size: 1.8em;">Просмотрите пятое обучающее видео:</h2>
+        <div class="video-container">
+          <iframe width="100%" height="500" src="https://www.youtube.com/embed/S2GQVPNhyt8" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <button class="btn-primary" onclick="startTest5()">Перейти к тесту</button>
+        </div>
+      </div>
+
+      <div class="section" id="section-test5">
+        <div class="test-container">
+          <h2 style="color: #E94A4E; margin-bottom: 15px; font-size: 2em;">Тест №5</h2>
+          <p style="color: #666; margin-bottom: 25px; font-size: 1.1em;">Ответьте на вопросы пятого теста</p>
+          <div class="progress-bar"><div class="progress" id="test5-progress"></div></div>
+          <div id="test5-questions"></div>
+          <div style="text-align: center; margin-top: 30px;">
+            <button id="submit-test5" class="btn-primary" onclick="submitTest5()" disabled>Завершить обучение</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="test5-error" class="error-message" style="display: none;">
+        <h3>❌ Тест не пройден</h3>
+        <p>Вы ответили неправильно на некоторые вопросы. Пожалуйста, просмотрите видео еще раз и попробуйте снова.</p>
+        <div class="retry-buttons">
+          <button class="btn-secondary" onclick="retryVideo5()">Смотреть видео заново</button>
+          <button class="btn-primary" onclick="retryTest5()">Пройти тест еще раз</button>
+        </div>
+      </div>
+
+      <!-- Завершение -->
+      <div class="completion-message" id="completion-message">
+        <div class="success-check">🎉</div>
+        <h2>Обучение успешно завершено!</h2>
+        <div class="completion-details">
+          <p><strong>Сотрудник:</strong> <span id="final-user"></span></p>
+          <p><strong>Должность:</strong> <span id="final-position"></span></p>
+          <p><strong>Дата и время начала:</strong> <span id="final-start"></span></p>
+          <p><strong>Дата и время завершения:</strong> <span id="final-end"></span></p>
+          <p><strong>Общее время обучения:</strong> <span id="total-time"></span></p>
+          <p><strong>Ошибок за обучение:</strong> <span id="final-errors"></span></p>
+          <p><strong>Прогресс кассира:</strong> <span id="final-cashier-progress"></span></p>
+        </div>
+        <p style="font-size: 1.1em; color: #666; margin-top: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
+          Результаты обучения сохранены в системе.
+        </p>
+      </div>
     </div>
+  </div>
 
-    <!-- Кнопка админ-панели -->
-    <button onclick="showPasswordPrompt()" style="position: fixed; bottom: 20px; left: 20px; padding: 12px 20px; background: #E94A4E; color: white; border: none; border-radius: 50px; z-index: 9999; font-weight: 600; box-shadow: 0 4px 15px rgba(233, 74, 78, 0.3); cursor: pointer; transition: all 0.3s ease;">📊 Админ-панель</button>
+  <!-- Кнопка админ-панели -->
+  <button onclick="showPasswordPrompt()"
+    style="position: fixed; bottom: 20px; left: 20px; padding: 12px 20px; background: #E94A4E; color: white; border: none; border-radius: 50px; z-index: 9999; font-weight: 600; box-shadow: 0 4px 15px rgba(233, 74, 78, 0.3); cursor: pointer; transition: all 0.3s ease;">
+    📊 Админ-панель
+  </button>
 
-    <script>
-        // Данные обучения
-        let trainingData = {
-            fullName: '',
-            position: '',
-            startTime: null,
-            endTime: null,
-            test1Score: 0,
-            test2Score: 0,
-            test3Score: 0,
-            test4Score: 0,
-            test5Score: 0
-        };
-// Счетчик ошибок для админа
-let errorCounter = {
-    test1: 0,
-    test2: 0,
-    test3: 0,
-    test4: 0,
-    test5: 0,
-    total: 0
-};
-        // Вопросы для тестов
-        const test1Questions = [
-            { question: "1. С какой стороны читается стандарт?", answers: ["Сверху вниз", "Снизу вверх", "Слева направо", "Справа налево"], correct: 1 },
-            { question: "2. Какой вид шаурмы есть?", answers: ["Мини, средний, большой", "Средний, большой", "Маленький, большой", "Половинка, большая"], correct: 0 }
-        ];
-        const test2Questions = [
-            { question: "1. Максимально сколько лаваша может расположиться на столе?", answers: ["1", "2", "3", "4"], correct: 1 },
-            { question: "2. Выберите правильное положение лаваша на шаблоне с метками:", answers: ["Лаваш полностью совпадает с контуром, не выходя за границы", "Край лаваша должен выходить за контур справа", "Лаваш должен перекрывать нижнюю границу контура", "Лаваш размещается произвольно — метки не учитываются"], correct: 0 }
-        ];
-        const test3Questions = [
-            { question: "После лаваша что ложится?", answers: ["Лук", "Помидор", "Картошка", "Соус"], correct: 2 },
-            { question: "Сколько грамм мяса для средней шаурмы?", answers: ["90", "80", "70", "130"], correct: 0 }
-        ];
-        const test4Questions = [
-            { question: "Сколько минут надо поджарить шаурму?", answers: ["1 мин каждую сторону", "2 мин каждую сторону", "3 мин каждую сторону", "4 мин каждую сторону"], correct: 1 },
-            { question: "Если клиент или вы спешите, сколько минут можно поджарить шаурму?", answers: ["1 мин каждую сторону", "30 сек каждую сторону", "Не надо жарить", "Надо обязательно жарить по стандарту"], correct: 3 }
-        ];
-        const test5Questions = [
-            { question: "Что вы должны сделать если собрали шаурму не по стандарту?", answers: ["Переделать", "Продолжить", "Разобрать"], correct: 0 },
-            { question: "Если весы изначально показывают значение больше или меньше 0 то что нужно сделать?", answers: ["Продолжить работать", "Заменить весы", "Сообщить менеджеру", "Нажать кнопку сброса пока не покажет 0"], correct: 3 }
-        ];
+  <script>
+    // =========================
+    // GOOGLE SHEETS (Web App URL)
+    // =========================
+    const GOOGLE_SHEETS_WEBAPP_URL =
+      "https://script.google.com/macros/s/AKfycbwdKw8bCvM6S2ElIHL_T27NcN6tlxTuwFfyRDaOo39DMC7O7kTBASsq-6fHD0I-w9B_8A/exec";
 
-        // Таймер
-        let startTimestamp = null;
-        let timerInterval = null;
-        function updateTimer() {
-            if (!startTimestamp) return;
-            const now = new Date();
-            const diff = now - startTimestamp;
-            const hours = Math.floor(diff / 3600000).toString().padStart(2, '0');
-            const minutes = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-            const seconds = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-            document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
-        }
-
-        // Сохранение ФИО
-        function saveName() {
-            const fullName = document.getElementById('full-name').value.trim();
-            if (!fullName) { alert('Пожалуйста, введите ваше ФИО'); return; }
-            trainingData.fullName = fullName;
-            trainingData.startTime = new Date();
-            startTimestamp = trainingData.startTime;
-            timerInterval = setInterval(updateTimer, 1000);
-            updateTimer();
-            document.getElementById('user-greeting').textContent = `Добро пожаловать, ${fullName}!`;
-            document.getElementById('start-time').textContent = `Начало обучения: ${trainingData.startTime.toLocaleString('ru-RU')}`;
-            localStorage.setItem('lastUserName', fullName);
-            showSection('section-position');
-        }
-
-        // Выбор должности
-        let selectedPosition = null;
-        document.querySelectorAll('.position-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('selected'));
-                this.classList.add('selected');
-                selectedPosition = this.dataset.position;
-                document.getElementById('select-position-btn').disabled = false;
-                this.style.animation = 'pulse 0.5s';
-                setTimeout(() => { this.style.animation = ''; }, 500);
-            });
+    async function sendToGoogleSheet(record) {
+      try {
+        const res = await fetch(GOOGLE_SHEETS_WEBAPP_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(record),
         });
 
-        function selectPosition() {
-            if (!selectedPosition) return;
-            trainingData.position = selectedPosition;
-            document.getElementById('current-position').textContent = selectedPosition;
-            document.getElementById('current-user').textContent = trainingData.fullName;
-            document.getElementById('final-position').textContent = selectedPosition;
-            document.getElementById('final-user').textContent = trainingData.fullName;
-            showSection('section-video1');
+        const text = await res.text();
+        console.log("Sheets response:", text);
+
+        try {
+          const json = JSON.parse(text);
+          return json && json.ok === true;
+        } catch {
+          return res.ok;
         }
-
-        // Показать секцию
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
-            document.querySelectorAll('.error-message').forEach(err => err.style.display = 'none');
-            document.getElementById(sectionId).classList.add('active');
-            window.scrollTo(0, 0);
-        }
-
-        // Начать тесты
-        function startTest1() { showSection('section-test1'); renderTestQuestions('test1-questions', test1Questions, 'test1'); }
-        function startTest2() { showSection('section-test2'); renderTestQuestions('test2-questions', test2Questions, 'test2'); }
-        function startTest3() { showSection('section-test3'); renderTestQuestions('test3-questions', test3Questions, 'test3'); }
-        function startTest4() { showSection('section-test4'); renderTestQuestions('test4-questions', test4Questions, 'test4'); }
-        function startTest5() { showSection('section-test5'); renderTestQuestions('test5-questions', test5Questions, 'test5'); }
-
-        // Отрисовка вопросов
-        function renderTestQuestions(containerId, questions, testPrefix) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            const letters = ['а', 'б', 'в', 'г'];
-            questions.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'question';
-                let answersHTML = '';
-                q.answers.forEach((answer, ansIndex) => {
-                    answersHTML += `
-                        <div class="answer" data-question="${index}" data-answer="${ansIndex}">
-                            <div class="answer-letter">${letters[ansIndex]}</div>
-                            <div class="answer-text">${answer}</div>
-                        </div>`;
-                });
-                questionDiv.innerHTML = `
-                    <h3>${q.question}</h3>
-                    <div class="answers">${answersHTML}</div>`;
-                container.appendChild(questionDiv);
-            });
-            document.querySelectorAll(`#${containerId} .answer`).forEach(answer => {
-                answer.addEventListener('click', function() {
-                    const questionIndex = parseInt(this.dataset.question);
-                    const answerIndex = parseInt(this.dataset.answer);
-                    this.parentElement.querySelectorAll('.answer').forEach(a => a.classList.remove('selected'));
-                    this.classList.add('selected');
-                    questions[questionIndex].selected = answerIndex;
-                    checkTestCompletion(questions, testPrefix);
-                });
-            });
-            document.getElementById(`${testPrefix}-progress`).style.width = '0%';
-        }
-
-        // Проверка заполнения теста
-        function checkTestCompletion(questions, testPrefix) {
-            const allAnswered = questions.every(q => q.selected !== undefined);
-            const submitBtn = document.getElementById(`submit-${testPrefix}`);
-            submitBtn.disabled = !allAnswered;
-            if (allAnswered) document.getElementById(`${testPrefix}-progress`).style.width = '100%';
-        }
-
-        // Проверка тестов
-function submitTest1() {
-    let score = 0;
-    test1Questions.forEach(q => { if (q.selected === q.correct) score++; });
-    trainingData.test1Score = score;
-    
-    // Добавляем счетчик ошибок ВНУТРИ функции
-    if (score !== test1Questions.length) {
-        errorCounter.test1++;
-        errorCounter.total++;
+      } catch (err) {
+        console.error("sendToGoogleSheet error:", err);
+        return false;
+      }
     }
-    
-    if (score === test1Questions.length) showSection('section-video2');
-    else document.getElementById('test1-error').style.display = 'block';
-}
-function submitTest2() {
-    let score = 0;
-    test2Questions.forEach(q => { if (q.selected === q.correct) score++; });
-    trainingData.test2Score = score;
-    
-    // Добавляем счетчик ошибок ВНУТРИ функции
-    if (score !== test2Questions.length) {
-        errorCounter.test2++;
-        errorCounter.total++;
+
+    // =========================
+    // ДАННЫЕ
+    // =========================
+    let trainingData = {
+      fullName: '',
+      position: '',
+      startTime: null,
+      endTime: null,
+
+      // для "Сборщик" (старый путь)
+      test1Score: 0,
+      test2Score: 0,
+      test3Score: 0,
+      test4Score: 0,
+      test5Score: 0,
+
+      // для "Кассир" (19 модулей)
+      cashierScores: [] // индекс = модуль-1, значение = {passed: boolean, score: number}
+    };
+
+    let errorCounter = { total: 0 };
+
+    // =========================
+    // КАССИР: 19 МОДУЛЕЙ (видео + тест из 2 вопросов)
+    // =========================
+    const cashierModules = [
+      {
+        title: "1. Открытие личной смены",
+        fileId: "1YEXETue5t_ohNsTnipkmFKLXRJEUIWtI",
+        questions: [
+          { question: "1) Что нужно сделать перед началом работы в личной смене?", answers: ["Сразу принимать заказы", "Проверить готовность рабочего места и открыть смену", "Попросить коллегу работать за вас", "Закрыть кассу"], correct: 1 },
+          { question: "2) Почему важно открывать личную смену корректно?", answers: ["Чтобы система не считала время", "Чтобы операции и отчеты фиксировались на сотрудника", "Чтобы не печатались чеки", "Чтобы не работал терминал"], correct: 1 }
+        ]
+      },
+      {
+        title: "2. Внесение денег",
+        fileId: "1GuneeTDAzDN_oPKSlRtguL_F_2vmgNvs",
+        questions: [
+          { question: "1) Внесение денег используется для:", answers: ["Списания продукции", "Пополнения кассы/денежного ящика", "Отмены заказа", "Закрытия смены"], correct: 1 },
+          { question: "2) Что важно указать при внесении?", answers: ["Только фамилию", "Сумму и корректное назначение операции", "Номер телефона клиента", "Цвет терминала"], correct: 1 }
+        ]
+      },
+      {
+        title: "3. Пересменка",
+        fileId: "1UMs0JuTnkzgncJawfq_cZ-Z1IuFKWoQ1",
+        questions: [
+          { question: "1) Пересменка нужна, чтобы:", answers: ["Скрыть выручку", "Передать смену и зафиксировать ответственность", "Удалить историю чеков", "Снять все товары со стоп-листа"], correct: 1 },
+          { question: "2) При пересменке важно:", answers: ["Не делать отчеты", "Корректно завершить/передать операции и деньги", "Оставить терминал включенным без контроля", "Изменить меню"], correct: 1 }
+        ]
+      },
+      {
+        title: "4. Как ставить и убрать со стоп-листа",
+        fileId: "1w1_Vh6F9fa9sV9TzrLK7bL3m6vcU3_7i",
+        questions: [
+          { question: "1) Стоп-лист ставят, когда:", answers: ["Продукт закончился/недоступен", "Клиент просит скидку", "Нужно поменять тип оплаты", "Смена закончилась"], correct: 0 },
+          { question: "2) Перед снятием со стоп-листа нужно:", answers: ["Проверить наличие/готовность продукта", "Сразу отменить все заказы", "Сделать пересменку", "Выдать зарплату"], correct: 0 }
+        ]
+      },
+      {
+        title: "5. Принять заказ",
+        fileId: "16a561HWz0EZMprlUzXFvoOBywhhLzbsK",
+        questions: [
+          { question: "1) При приёме заказа кассир должен:", answers: ["Не уточнять детали", "Проверить состав, адрес/самовывоз и способ оплаты", "Сразу закрыть заказ", "Снять со стоп-листа всё меню"], correct: 1 },
+          { question: "2) Перед подтверждением заказа важно:", answers: ["Сделать изъятие суммы", "Убедиться, что позиции и цена верные", "Отключить терминал", "Удалить клиента"], correct: 1 }
+        ]
+      },
+      {
+        title: "6. Изменить тип оплаты",
+        fileId: "1rEwyOkLTf4XKAeH563aYzRd2N_tgsrlu",
+        questions: [
+          { question: "1) Когда меняют тип оплаты?", answers: ["Если клиент изменил способ оплаты", "Чтобы не печатался чек", "Чтобы не работала касса", "Чтобы добавить курьера"], correct: 0 },
+          { question: "2) После смены типа оплаты нужно:", answers: ["Проверить, что новый тип отражается в заказе", "Отменить заказ", "Списать продукцию", "Закрыть личную смену"], correct: 0 }
+        ]
+      },
+      {
+        title: "7. Отменить одно блюдо в заказе",
+        fileId: "1URkf8sICc8OdbNkrh7AAr5p5ocQJEmLy",
+        questions: [
+          { question: "1) Отмена одного блюда используется, когда:", answers: ["Нужно изменить терминал", "Клиент отказался от позиции/позиция недоступна", "Нужно закрыть смену", "Нужно поставить приход"], correct: 1 },
+          { question: "2) Перед отменой позиции важно:", answers: ["Уточнить причину и проверить, что отменяется правильная позиция", "Сразу нажать “отмена заказа”", "Выдать зарплату", "Снять выручку"], correct: 0 }
+        ]
+      },
+      {
+        title: "8. Отмена заказа",
+        fileId: "1cM8XXkHb_5hzQTM7IqV3iGZY8gldWKzR",
+        questions: [
+          { question: "1) Полная отмена заказа делается, когда:", answers: ["Нужно поменять стоп-лист", "Заказ отменён клиентом/ошибочно создан", "Нужно принять доставку", "Нужно сделать приход продукции"], correct: 1 },
+          { question: "2) После отмены заказа важно:", answers: ["Проверить, что заказ реально перешёл в статус отменён", "Не делать ничего", "Сразу закрыть кассу", "Удалить кассовый отчёт"], correct: 0 }
+        ]
+      },
+      {
+        title: "9. Смешанный тип оплаты",
+        fileId: "17yMLVseHD9P6caFkMNeNGhyyXh3ypBBX",
+        questions: [
+          { question: "1) Смешанный тип оплаты — это:", answers: ["Оплата только наличными", "Оплата одной частью наличными, другой — картой/другим способом", "Оплата только бонусами", "Оплата после закрытия смены"], correct: 1 },
+          { question: "2) При смешанной оплате важно:", answers: ["Не указывать суммы", "Корректно распределить суммы по способам оплаты", "Отменить заказ", "Списать продукцию"], correct: 1 }
+        ]
+      },
+      {
+        title: "10. 1+1 заказ на кассе",
+        fileId: "1vbUYZuu_iVYo9deaf5KuiDDuStugafg0",
+        questions: [
+          { question: "1) Акция 1+1 означает:", answers: ["Два товара по цене одного (по правилам акции)", "Скидка 1%", "Оплата двумя картами", "Только самовывоз"], correct: 0 },
+          { question: "2) Чтобы акция применилась правильно, кассир должен:", answers: ["Добавить позиции, подходящие под условия 1+1", "Отменить заказ", "Снять деньги из кассы", "Поставить всё в стоп-лист"], correct: 0 }
+        ]
+      },
+      {
+        title: "11. Назначение курьера",
+        fileId: "12tdzK1xRFGlvw-os8yBKM_pcEMmo2XdG",
+        questions: [
+          { question: "1) Назначение курьера нужно для:", answers: ["Списания товара", "Передачи доставки конкретному курьеру", "Отчета по кассе", "Пересменки"], correct: 1 },
+          { question: "2) При назначении курьера важно:", answers: ["Выбрать правильного курьера и проверить заказ/адрес", "Снять выручку", "Выдать зарплату", "Поставить приход"], correct: 0 }
+        ]
+      },
+      {
+        title: "12. Заказ без выручки",
+        fileId: "1tiKRVm2HEuTVSCk384GrZ4o_qEDIqlvV",
+        questions: [
+          { question: "1) Заказ без выручки используется, когда:", answers: ["Клиент оплатил наличными", "Заказ оформляется без поступления денег (по правилам)", "Нужно закрыть смену", "Нужно поменять стоп-лист"], correct: 1 },
+          { question: "2) При таком заказе важно:", answers: ["Корректно указать причину/основание", "Не фиксировать заказ в системе", "Отменить терминал", "Выдать чек без заказа"], correct: 0 }
+        ]
+      },
+      {
+        title: "13. Выдача зарплаты",
+        fileId: "1fuKOgQLolmQRkmVEDTs_LOHyIsTr21Gl",
+        questions: [
+          { question: "1) Выдача зарплаты — это операция:", answers: ["По списанию продукции", "По выдаче денежных средств сотруднику", "По отмене заказа", "По приемке доставки"], correct: 1 },
+          { question: "2) Перед выдачей зарплаты нужно:", answers: ["Проверить сумму и основание/подтверждение", "Снять всё со стоп-листа", "Отменить заказы", "Назначить курьера"], correct: 0 }
+        ]
+      },
+      {
+        title: "14. Перемещение продукции",
+        fileId: "1T0LY634DY4ocw5ygkUuDtm74SZRMvQpp",
+        questions: [
+          { question: "1) Перемещение продукции нужно для:", answers: ["Перевода товара между точками/складами (по правилам)", "Отмены заказа", "Изменения типа оплаты", "Открытия смены"], correct: 0 },
+          { question: "2) При перемещении важно:", answers: ["Указать верную номенклатуру и количество", "Не указывать количество", "Сделать изъятие суммы", "Выдать зарплату"], correct: 0 }
+        ]
+      },
+      {
+        title: "15. Отчет по кассе и работа с терминалом",
+        fileId: "1DVYoNbWpVnNp3zeh7LjDfytkexMwWSQI",
+        questions: [
+          { question: "1) Отчет по кассе нужен, чтобы:", answers: ["Скрыть операции", "Сверить и зафиксировать кассовые показатели", "Поставить стоп-лист", "Списать продукцию"], correct: 1 },
+          { question: "2) При работе с терминалом важно:", answers: ["Игнорировать ошибки оплаты", "Следить за статусом оплаты и подтверждением", "Всегда менять тип оплаты на наличные", "Отменять заказ после оплаты"], correct: 1 }
+        ]
+      },
+      {
+        title: "16. Изъятие суммы",
+        fileId: "1Un1XuIznAjaRnF4PTKpXmk4OHmevs88C",
+        questions: [
+          { question: "1) Изъятие суммы используется для:", answers: ["Внесения денег", "Вывода части наличных из кассы (по правилам)", "Поставить приход товара", "Назначения курьера"], correct: 1 },
+          { question: "2) При изъятии важно:", answers: ["Указать сумму и причину/назначение", "Не фиксировать в системе", "Сменить стоп-лист", "Отменить все заказы"], correct: 0 }
+        ]
+      },
+      {
+        title: "17. Поставить продукцию на приход",
+        fileId: "14YVzBvHpOj4q67xvDfxW2kC8aY3YPATI",
+        questions: [
+          { question: "1) Приход продукции означает:", answers: ["Списание товара", "Поступление товара на склад/точку", "Отмена заказа", "Изъятие денег"], correct: 1 },
+          { question: "2) При оформлении прихода важно:", answers: ["Указать корректное количество и номенклатуру", "Не указывать единицы", "Выдать зарплату", "Открыть личную смену заново"], correct: 0 }
+        ]
+      },
+      {
+        title: "18. Списание продукции",
+        fileId: "1aY8NVRcAln7UEWjLfRtk0IrMlF9Fxarr",
+        questions: [
+          { question: "1) Списание продукции делают, когда:", answers: ["Товар испорчен/утрачен/по правилам учета", "Нужно принять заказ", "Нужно сменить оплату", "Нужно назначить курьера"], correct: 0 },
+          { question: "2) При списании важно:", answers: ["Указать причину списания и количество", "Не фиксировать причину", "Снять деньги из кассы", "Удалить смену"], correct: 0 }
+        ]
+      },
+      {
+        title: "19. Закрытие личной смены",
+        fileId: "1Qn7HAH_0UEYrsBbbtRfuvilfjS63e0x0",
+        questions: [
+          { question: "1) Закрытие личной смены нужно, чтобы:", answers: ["Продолжить работу в системе", "Завершить рабочие операции и зафиксировать результаты", "Снять стоп-лист", "Создать заказ без выручки"], correct: 1 },
+          { question: "2) Перед закрытием личной смены важно:", answers: ["Проверить, что все операции выполнены и отчеты/остатки корректны", "Отменить все чеки", "Списать всю продукцию", "Выдать зарплату всем подряд"], correct: 0 }
+        ]
+      }
+    ];
+
+    // =========================
+    // СБОРЩИК: вопросы (как у вас)
+    // =========================
+    const test1Questions = [
+      { question: "1. С какой стороны читается стандарт?", answers: ["Сверху вниз", "Снизу вверх", "Слева направо", "Справа налево"], correct: 1 },
+      { question: "2. Какой вид шаурмы есть?", answers: ["Мини, средний, большой", "Средний, большой", "Маленький, большой", "Половинка, большая"], correct: 0 }
+    ];
+    const test2Questions = [
+      { question: "1. Максимально сколько лаваша может расположиться на столе?", answers: ["1", "2", "3", "4"], correct: 1 },
+      { question: "2. Выберите правильное положение лаваша на шаблоне с метками:", answers: ["Лаваш полностью совпадает с контуром, не выходя за границы", "Край лаваша должен выходить за контур справа", "Лаваш должен перекрывать нижнюю границу контура", "Лаваш размещается произвольно — метки не учитываются"], correct: 0 }
+    ];
+    const test3Questions = [
+      { question: "После лаваша что ложится?", answers: ["Лук", "Помидор", "Картошка", "Соус"], correct: 2 },
+      { question: "Сколько грамм мяса для средней шаурмы?", answers: ["90", "80", "70", "130"], correct: 0 }
+    ];
+    const test4Questions = [
+      { question: "Сколько минут надо поджарить шаурму?", answers: ["1 мин каждую сторону", "2 мин каждую сторону", "3 мин каждую сторону", "4 мин каждую сторону"], correct: 1 },
+      { question: "Если клиент или вы спешите, сколько минут можно поджарить шаурму?", answers: ["1 мин каждую сторону", "30 сек каждую сторону", "Не надо жарить", "Надо обязательно жарить по стандарту"], correct: 3 }
+    ];
+    const test5Questions = [
+      { question: "Что вы должны сделать если собрали шаурму не по стандарту?", answers: ["Переделать", "Продолжить", "Разобрать"], correct: 0 },
+      { question: "Если весы изначально показывают значение больше или меньше 0 то что нужно сделать?", answers: ["Продолжить работать", "Заменить весы", "Сообщить менеджеру", "Нажать кнопку сброса пока не покажет 0"], correct: 3 }
+    ];
+
+    // =========================
+    // ТАЙМЕР
+    // =========================
+    let startTimestamp = null;
+    let timerInterval = null;
+
+    function updateTimer() {
+      if (!startTimestamp) return;
+      const now = new Date();
+      const diff = now - startTimestamp;
+      const hours = Math.floor(diff / 3600000).toString().padStart(2, '0');
+      const minutes = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+      const seconds = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+      document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
     }
-    
-    if (score === test2Questions.length) showSection('section-video3');
-    else document.getElementById('test2-error').style.display = 'block';
-}
-function submitTest3() {
-    let score = 0;
-    test3Questions.forEach(q => { if (q.selected === q.correct) score++; });
-    trainingData.test3Score = score;
-    
-    // Добавляем счетчик ошибок ВНУТРИ функции
-    if (score !== test3Questions.length) {
-        errorCounter.test3++;
-        errorCounter.total++;
+
+    // =========================
+    // ОБЩИЕ ФУНКЦИИ
+    // =========================
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+      document.querySelectorAll('.error-message').forEach(err => err.style.display = 'none');
+      const el = document.getElementById(sectionId);
+      if (el) el.classList.add('active');
+      window.scrollTo(0, 0);
     }
-    
-    if (score === test3Questions.length) showSection('section-video4');
-    else document.getElementById('test3-error').style.display = 'block';
-}
-function submitTest4() {
-    let score = 0;
-    test4Questions.forEach(q => { if (q.selected === q.correct) score++; });
-    trainingData.test4Score = score;
-    
-    // Добавляем счетчик ошибок ВНУТРИ функции
-    if (score !== test4Questions.length) {
-        errorCounter.test4++;
-        errorCounter.total++;
+
+    function saveName() {
+      const fullName = document.getElementById('full-name').value.trim();
+      if (!fullName) { alert('Пожалуйста, введите ваше ФИО'); return; }
+
+      trainingData.fullName = fullName;
+      trainingData.startTime = new Date();
+      startTimestamp = trainingData.startTime;
+      timerInterval = setInterval(updateTimer, 1000);
+      updateTimer();
+
+      document.getElementById('user-greeting').textContent = `Добро пожаловать, ${fullName}!`;
+      document.getElementById('start-time').textContent = `Начало обучения: ${trainingData.startTime.toLocaleString('ru-RU')}`;
+      localStorage.setItem('lastUserName', fullName);
+
+      showSection('section-position');
     }
-    
-    if (score === test4Questions.length) showSection('section-video5');
-    else document.getElementById('test4-error').style.display = 'block';
-}
-function submitTest5() {
-    let score = 0;
-    test5Questions.forEach(q => { if (q.selected === q.correct) score++; });
-    trainingData.test5Score = score;
-    
-    // Добавляем счетчик ошибок ВНУТРИ функции
-    if (score !== test5Questions.length) {
-        errorCounter.test5++;
-        errorCounter.total++;
+
+    let selectedPosition = null;
+    document.querySelectorAll('.position-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (this.disabled) return;
+        document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedPosition = this.dataset.position;
+        document.getElementById('select-position-btn').disabled = false;
+        this.style.animation = 'pulse 0.5s';
+        setTimeout(() => { this.style.animation = ''; }, 500);
+      });
+    });
+
+    function selectPosition() {
+      if (!selectedPosition) return;
+
+      trainingData.position = selectedPosition;
+
+      document.getElementById('final-user').textContent = trainingData.fullName;
+      document.getElementById('final-position').textContent = trainingData.position;
+
+      if (selectedPosition === 'Кассир') {
+        startCashierTraining();
+        return;
+      }
+
+      if (selectedPosition === 'Сборщик') {
+        document.getElementById('current-position').textContent = selectedPosition;
+        document.getElementById('current-user').textContent = trainingData.fullName;
+        showSection('section-video1');
+        return;
+      }
+
+      alert('Для этой должности обучение пока не настроено.');
     }
-    
-    if (score === test5Questions.length) {
+
+    // =========================
+    // РЕНДЕР ТЕСТОВ (универсально)
+    // =========================
+    function renderTestQuestions(containerId, questions, testPrefix) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.innerHTML = '';
+      const letters = ['а', 'б', 'в', 'г'];
+
+      questions.forEach((q, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question';
+
+        let answersHTML = '';
+        q.answers.forEach((answer, ansIndex) => {
+          answersHTML += `
+            <div class="answer" data-question="${index}" data-answer="${ansIndex}">
+              <div class="answer-letter">${letters[ansIndex] ?? ''}</div>
+              <div class="answer-text">${answer}</div>
+            </div>`;
+        });
+
+        questionDiv.innerHTML = `
+          <h3>${q.question}</h3>
+          <div class="answers">${answersHTML}</div>`;
+
+        container.appendChild(questionDiv);
+      });
+
+      document.querySelectorAll(`#${containerId} .answer`).forEach(answer => {
+        answer.addEventListener('click', function() {
+          const questionIndex = parseInt(this.dataset.question, 10);
+          const answerIndex = parseInt(this.dataset.answer, 10);
+
+          this.parentElement.querySelectorAll('.answer').forEach(a => a.classList.remove('selected'));
+          this.classList.add('selected');
+
+          questions[questionIndex].selected = answerIndex;
+          checkTestCompletion(questions, testPrefix);
+        });
+      });
+
+      // reset progress
+      const progressEl = document.getElementById(`${testPrefix}-progress`);
+      if (progressEl) progressEl.style.width = '0%';
+    }
+
+    function checkTestCompletion(questions, testPrefix) {
+      const allAnswered = questions.every(q => q.selected !== undefined);
+      const submitBtn = document.getElementById(`submit-${testPrefix}`);
+      if (submitBtn) submitBtn.disabled = !allAnswered;
+
+      const progressEl = document.getElementById(`${testPrefix}-progress`);
+      if (progressEl && allAnswered) progressEl.style.width = '100%';
+    }
+
+    // =========================
+    // СБОРЩИК: тесты
+    // =========================
+    function startTest1() { showSection('section-test1'); renderTestQuestions('test1-questions', test1Questions, 'test1'); }
+    function startTest2() { showSection('section-test2'); renderTestQuestions('test2-questions', test2Questions, 'test2'); }
+    function startTest3() { showSection('section-test3'); renderTestQuestions('test3-questions', test3Questions, 'test3'); }
+    function startTest4() { showSection('section-test4'); renderTestQuestions('test4-questions', test4Questions, 'test4'); }
+    function startTest5() { showSection('section-test5'); renderTestQuestions('test5-questions', test5Questions, 'test5'); }
+
+    function submitTest1() {
+      let score = 0;
+      test1Questions.forEach(q => { if (q.selected === q.correct) score++; });
+      trainingData.test1Score = score;
+
+      if (score !== test1Questions.length) { errorCounter.total++; }
+      if (score === test1Questions.length) showSection('section-video2');
+      else document.getElementById('test1-error').style.display = 'block';
+    }
+    function submitTest2() {
+      let score = 0;
+      test2Questions.forEach(q => { if (q.selected === q.correct) score++; });
+      trainingData.test2Score = score;
+
+      if (score !== test2Questions.length) { errorCounter.total++; }
+      if (score === test2Questions.length) showSection('section-video3');
+      else document.getElementById('test2-error').style.display = 'block';
+    }
+    function submitTest3() {
+      let score = 0;
+      test3Questions.forEach(q => { if (q.selected === q.correct) score++; });
+      trainingData.test3Score = score;
+
+      if (score !== test3Questions.length) { errorCounter.total++; }
+      if (score === test3Questions.length) showSection('section-video4');
+      else document.getElementById('test3-error').style.display = 'block';
+    }
+    function submitTest4() {
+      let score = 0;
+      test4Questions.forEach(q => { if (q.selected === q.correct) score++; });
+      trainingData.test4Score = score;
+
+      if (score !== test4Questions.length) { errorCounter.total++; }
+      if (score === test4Questions.length) showSection('section-video5');
+      else document.getElementById('test4-error').style.display = 'block';
+    }
+    function submitTest5() {
+      let score = 0;
+      test5Questions.forEach(q => { if (q.selected === q.correct) score++; });
+      trainingData.test5Score = score;
+
+      if (score !== test5Questions.length) { errorCounter.total++; }
+
+      if (score === test5Questions.length) {
         trainingData.endTime = new Date();
         completeTraining();
-    } else document.getElementById('test5-error').style.display = 'block';
-}
-        // Функции повторного прохождения
-        function retryVideo1() { showSection('section-video1'); }
-        function retryTest1() { test1Questions.forEach(q => { q.selected = undefined; }); startTest1(); }
-        function retryVideo2() { showSection('section-video2'); }
-        function retryTest2() { test2Questions.forEach(q => { q.selected = undefined; }); startTest2(); }
-        function retryVideo3() { showSection('section-video3'); }
-        function retryTest3() { test3Questions.forEach(q => { q.selected = undefined; }); startTest3(); }
-        function retryVideo4() { showSection('section-video4'); }
-        function retryTest4() { test4Questions.forEach(q => { q.selected = undefined; }); startTest4(); }
-        function retryVideo5() { showSection('section-video5'); }
-        function retryTest5() { test5Questions.forEach(q => { q.selected = undefined; }); startTest5(); }
-// Завершение обучения
-function completeTraining() {
-    clearInterval(timerInterval);
-    const totalTime = trainingData.endTime - trainingData.startTime;
-    const hours = Math.floor(totalTime / 3600000);
-    const minutes = Math.floor((totalTime % 3600000) / 60000);
-    const seconds = Math.floor((totalTime % 60000) / 1000);
-    document.getElementById('final-start').textContent = trainingData.startTime.toLocaleString('ru-RU');
-    document.getElementById('final-end').textContent = trainingData.endTime.toLocaleString('ru-RU');
-    document.getElementById('total-time').textContent = `${hours} ч ${minutes} мин ${seconds} сек`;
-    document.getElementById('completion-message').classList.add('active');
-    saveTrainingData();
-    
-    // Обнуляем счетчик ошибок для следующего пользователя
-    errorCounter = {
-        test1: 0,
-        test2: 0,
-        test3: 0,
-        test4: 0,
-        test5: 0,
-        total: 0
-    };
-}
-// Сохранение данных в localStorage
-function saveTrainingData() {
-    const allTrainings = JSON.parse(localStorage.getItem('trainingRecords') || '[]');
-    const record = { 
-        ...trainingData, 
-        startTime: trainingData.startTime.toISOString(), 
-        endTime: trainingData.endTime.toISOString(), 
+      } else {
+        document.getElementById('test5-error').style.display = 'block';
+      }
+    }
+
+    function retryVideo1() { showSection('section-video1'); }
+    function retryTest1() { test1Questions.forEach(q => { q.selected = undefined; }); startTest1(); }
+    function retryVideo2() { showSection('section-video2'); }
+    function retryTest2() { test2Questions.forEach(q => { q.selected = undefined; }); startTest2(); }
+    function retryVideo3() { showSection('section-video3'); }
+    function retryTest3() { test3Questions.forEach(q => { q.selected = undefined; }); startTest3(); }
+    function retryVideo4() { showSection('section-video4'); }
+    function retryTest4() { test4Questions.forEach(q => { q.selected = undefined; }); startTest4(); }
+    function retryVideo5() { showSection('section-video5'); }
+    function retryTest5() { test5Questions.forEach(q => { q.selected = undefined; }); startTest5(); }
+
+    // =========================
+    // КАССИР: логика 19 модулей
+    // =========================
+    let cashierIndex = 0;
+
+    function drivePreviewUrl(fileId) {
+      return `https://drive.google.com/file/d/${fileId}/preview`;
+    }
+
+    function startCashierTraining() {
+      cashierIndex = 0;
+      trainingData.cashierScores = new Array(cashierModules.length).fill(null);
+
+      document.getElementById('cashier-position').textContent = 'Кассир';
+      document.getElementById('cashier-user').textContent = trainingData.fullName;
+      document.getElementById('cashier-module-total').textContent = String(cashierModules.length);
+
+      showCashierModule(cashierIndex);
+    }
+
+    function showCashierModule(index) {
+      cashierIndex = index;
+
+      const mod = cashierModules[cashierIndex];
+      if (!mod) return;
+
+      document.getElementById('cashier-module-num').textContent = String(cashierIndex + 1);
+      document.getElementById('cashier-module-title').textContent = mod.title;
+
+      const iframe = document.getElementById('cashier-video-iframe');
+      iframe.src = drivePreviewUrl(mod.fileId);
+
+      showSection('section-cashier-video');
+    }
+
+    function cashierGoToTest() {
+      const mod = cashierModules[cashierIndex];
+      if (!mod) return;
+
+      // сброс выбранных ответов
+      mod.questions.forEach(q => { q.selected = undefined; });
+
+      document.getElementById('cashier-test-title').textContent =
+        `Тест (Кассир) — модуль ${cashierIndex + 1}: ${mod.title}`;
+
+      document.getElementById('cashier-test-progress').style.width = '0%';
+
+      showSection('section-cashier-test');
+      renderTestQuestions('cashier-test-questions', mod.questions, 'cashier-test');
+    }
+
+    function submitCashierTest() {
+      const mod = cashierModules[cashierIndex];
+      if (!mod) return;
+
+      let score = 0;
+      mod.questions.forEach(q => { if (q.selected === q.correct) score++; });
+
+      trainingData.cashierScores[cashierIndex] = { passed: score === mod.questions.length, score: score };
+
+      if (score !== mod.questions.length) {
+        errorCounter.total++;
+        document.getElementById('cashier-test-error').style.display = 'block';
+        return;
+      }
+
+      const nextIndex = cashierIndex + 1;
+      if (nextIndex < cashierModules.length) {
+        showCashierModule(nextIndex);
+      } else {
+        trainingData.endTime = new Date();
+        completeTraining();
+      }
+    }
+
+    function cashierRetryVideo() { showCashierModule(cashierIndex); }
+    function cashierRetryTest() { cashierGoToTest(); }
+
+    // =========================
+    // ЗАВЕРШЕНИЕ
+    // =========================
+    function completeTraining() {
+      clearInterval(timerInterval);
+
+      const totalTime = trainingData.endTime - trainingData.startTime;
+      const hours = Math.floor(totalTime / 3600000);
+      const minutes = Math.floor((totalTime % 3600000) / 60000);
+      const seconds = Math.floor((totalTime % 60000) / 1000);
+
+      document.getElementById('final-start').textContent = trainingData.startTime.toLocaleString('ru-RU');
+      document.getElementById('final-end').textContent = trainingData.endTime.toLocaleString('ru-RU');
+      document.getElementById('total-time').textContent = `${hours} ч ${minutes} мин ${seconds} сек`;
+      document.getElementById('final-errors').textContent = String(errorCounter.total);
+
+      const cashierPassed = (trainingData.cashierScores || []).filter(x => x && x.passed).length;
+      const cashierTotal = cashierModules.length;
+      document.getElementById('final-cashier-progress').textContent =
+        trainingData.position === 'Кассир' ? `${cashierPassed}/${cashierTotal}` : '—';
+
+      document.getElementById('completion-message').classList.add('active');
+
+      saveTrainingData();
+
+      errorCounter = { total: 0 };
+    }
+
+    // ВАЖНО: теперь сохраняем и в localStorage, и в Google Sheets
+    async function saveTrainingData() {
+      const record = {
+        ...trainingData,
+        startTime: trainingData.startTime && trainingData.startTime.toISOString ? trainingData.startTime.toISOString() : trainingData.startTime,
+        endTime: trainingData.endTime && trainingData.endTime.toISOString ? trainingData.endTime.toISOString() : trainingData.endTime,
         completed: true,
-        // Сохраняем общее количество ошибок
         totalErrors: errorCounter.total
-    };
-    allTrainings.push(record);
-    localStorage.setItem('trainingRecords', JSON.stringify(allTrainings));
-    console.log('Данные обучения сохранены:', record);
-    
-    // Сохраняем детальную статистику ошибок
-    const errorStats = JSON.parse(localStorage.getItem('errorStats') || '{}');
-    errorStats[trainingData.fullName] = {
-        ...errorCounter,
-        timestamp: new Date().toISOString(),
-        position: trainingData.position
-    };
-    localStorage.setItem('errorStats', JSON.stringify(errorStats));
-}
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedName = localStorage.getItem('lastUserName');
-            if (savedName) document.getElementById('full-name').value = savedName;
-            setTimeout(() => { const nameInput = document.getElementById('full-name'); if (nameInput) nameInput.focus(); }, 300);
-        });
+      };
 
-        // Админ-панель (оставлена без изменений, но исправлены шаблонные строки)
-        const ADMIN_PASSWORD = "1616";
-        document.addEventListener('DOMContentLoaded', function() {
-            const adminBtn = document.querySelector('button[onclick="showPasswordPrompt()"]');
-            if (adminBtn) {
-                adminBtn.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-3px)';
-                    this.style.boxShadow = '0 8px 25px rgba(233, 74, 78, 0.4)';
-                });
-                adminBtn.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 15px rgba(233, 74, 78, 0.3)';
-                });
-            }
-        });
-        function showPasswordPrompt() {
-            let html = `
-                <div id="password-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; justify-content: center; align-items: center;">
-                    <div style="background: white; padding: 40px; border-radius: 15px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                        <h2 style="color: #E94A4E; margin-bottom: 20px;">🔐 Доступ к админ-панели</h2>
-                        <p style="margin-bottom: 20px; color: #666;">Введите пароль для просмотра записей:</p>
-                        <input type="password" id="admin-password-input" style="width: 100%; padding: 15px; font-size: 18px; border: 2px solid #E94A4E; border-radius: 8px; margin-bottom: 20px;" placeholder="Введите пароль">
-                        <div id="password-error" style="color: #ff4444; margin-bottom: 15px; min-height: 20px;"></div>
-                        <div style="display: flex; gap: 10px; justify-content: center;">
-                            <button onclick="checkAdminPassword()" style="padding: 12px 30px; background: #E94A4E; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600;">Войти</button>
-                            <button onclick="closePasswordModal()" style="padding: 12px 30px; background: #ccc; color: #333; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600;">Отмена</button>
-                        </div>
-                    </div>
-                </div>`;
-            const existingModal = document.getElementById('password-modal');
-            if (existingModal) existingModal.remove();
-            document.body.insertAdjacentHTML('beforeend', html);
-            setTimeout(() => {
-                const input = document.getElementById('admin-password-input');
-                if (input) {
-                    input.focus();
-                    input.addEventListener('input', function() { this.value = this.value.replace(/\D/g, ''); });
-                }
-            }, 100);
-        }
-        function closePasswordModal() {
-            const modal = document.getElementById('password-modal');
-            if (modal) modal.remove();
-        }
-        function checkAdminPassword() {
-            const input = document.getElementById('admin-password-input');
-            const errorDiv = document.getElementById('password-error');
-            if (!input) return;
-            const enteredPassword = input.value;
-            if (enteredPassword === ADMIN_PASSWORD) {
-                closePasswordModal();
-                showAdminPanel();
-            } else {
-                input.style.borderColor = '#ff4444';
-                input.style.animation = 'shake 0.5s';
-                if (errorDiv) errorDiv.textContent = 'Неверный пароль! Попробуйте снова.';
-                input.value = '';
-                input.focus();
-                setTimeout(() => { input.style.animation = ''; }, 500);
-            }
-        }
-        if (!document.querySelector('style#admin-styles')) {
-            const style = document.createElement('style');
-            style.id = 'admin-styles';
-            style.textContent = `
-                @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
-                #admin-password-input:focus { outline: none; border-color: #E94A4E; box-shadow: 0 0 0 3px rgba(233, 74, 78, 0.2); }
-                @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-                @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }`;
-            document.head.appendChild(style);
-        }
-        document.addEventListener('keydown', function(e) {
-            const passwordInput = document.getElementById('admin-password-input');
-            if (passwordInput && e.key === 'Enter') checkAdminPassword();
-        });
-function showAdminPanel() {
-    let allTrainings = [];
-    try {
-        const storedData = localStorage.getItem('trainingRecords');
-        if (storedData) allTrainings = JSON.parse(storedData);
-    } catch (e) {
-        console.error('Ошибка при чтении данных из localStorage:', e);
+      // localStorage (как было)
+      const allTrainings = JSON.parse(localStorage.getItem('trainingRecords') || '[]');
+      allTrainings.push(record);
+      localStorage.setItem('trainingRecords', JSON.stringify(allTrainings));
+
+      // Google Sheets
+      const ok = await sendToGoogleSheet(record);
+      if (!ok) {
+        console.warn('Не записалось в Google Sheets (локально сохранено).');
+      }
     }
-    
-    // Рассчитываем общее количество ошибок для статистики вверху
-    const totalErrorsAll = allTrainings.reduce((sum, record) => sum + (record.totalErrors || 0), 0);
-    const avgErrors = allTrainings.length > 0 ? (totalErrorsAll / allTrainings.length).toFixed(1) : '0';
-    
-    let html = `
-        <div id="admin-panel" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; padding: 20px; overflow-y: auto;">
-            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 1200px; margin: 0 auto; position: relative;">
-                <button onclick="closeAdminPanel()" style="position: absolute; top: 15px; right: 15px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                    <h2 style="color: #E94A4E; margin: 0; font-size: 1.8em;">📋 Все записи обучения</h2>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <span style="color: #666; font-size: 14px; background: #f0f0f0; padding: 5px 10px; border-radius: 4px;">Пароль: 1616</span>
-                        <button onclick="refreshAdminData()" style="background: #4a6fa5; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 14px;">🔄 Обновить</button>
-                    </div>
-                </div>`;
-    
-    if (allTrainings.length === 0) {
-        html += `
-            <div style="text-align: center; padding: 60px 20px;">
-                <p style="color: #666; font-size: 1.2em; margin-bottom: 20px;">Записей пока нет</p>
-                <p style="color: #999; font-size: 0.9em;">Пройти обучение можно на этой же странице</p>
-            </div>`;
-    } else {
-        const completedTrainings = allTrainings.filter(t => t.test1Score === 2 && t.test2Score === 2 && t.test3Score === 2 && t.test4Score === 2 && t.test5Score === 2).length;
-        const successRate = allTrainings.length > 0 ? Math.round(completedTrainings / allTrainings.length * 100) : 0;
-        
-        html += `
-            <div style="margin-bottom: 30px;">
-                <p style="color: #E94A4E; font-weight: bold; font-size: 1.1em;">Всего записей: ${allTrainings.length}</p>
-                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
-                    <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; flex: 1; min-width: 200px;">
-                        <div style="font-size: 0.9em; color: #666;">Успешно завершено</div>
-                        <div style="font-size: 1.5em; font-weight: bold; color: #34A853;">${completedTrainings}</div>
-                        <div style="font-size: 0.9em; color: #666;">${successRate}% от общего числа</div>
-                    </div>
-                    <div style="background: #fff5f5; padding: 15px; border-radius: 8px; flex: 1; min-width: 200px;">
-                        <div style="font-size: 0.9em; color: #666;">Всего ошибок</div>
-                        <div style="font-size: 1.5em; font-weight: bold; color: #E94A4E;">${totalErrorsAll}</div>
-                        <div style="font-size: 0.9em; color: #666;">${avgErrors} в среднем</div>
-                    </div>`;
-        
-        if (allTrainings.length > 0) {
-            const lastRecord = allTrainings[allTrainings.length - 1];
-            const lastDate = lastRecord.endTime ? new Date(lastRecord.endTime).toLocaleDateString('ru-RU') : 'Не завершено';
-            html += `
-                <div style="background: #fff5f5; padding: 15px; border-radius: 8px; flex: 1; min-width: 200px;">
-                    <div style="font-size: 0.9em; color: #666;">Последняя запись</div>
-                    <div style="font-size: 1.2em; font-weight: bold; color: #E94A4E;">${lastRecord.fullName || 'Без имени'}</div>
-                    <div style="font-size: 0.9em; color: #666;">${lastDate}</div>
-                </div>`;
-        }
-        
-        html += `</div></div>`;
-        
-        html += `
-            <div style="overflow-x: auto; margin-top: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
-                <table style="width: 100%; border-collapse: collapse; min-width: 1000px;">
-                    <thead>
-                        <tr style="background: linear-gradient(to right, #E94A4E, #d63c40); color: white;">
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">№</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">ФИО</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Должность</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Начало обучения</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Завершение</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Тест 1</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Тест 2</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Тест 3</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Тест 4</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Тест 5</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Ошибок</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left; font-weight: 600;">Статус</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-        
-        allTrainings.forEach((record, index) => {
-            const startTime = record.startTime ? new Date(record.startTime).toLocaleString('ru-RU') : 'Не указано';
-            const endTime = record.endTime ? new Date(record.endTime).toLocaleString('ru-RU') : 'Не завершено';
-            const rowColor = index % 2 === 0 ? '#f8f9fa' : 'white';
-            let status = '❓', statusColor = '#FFB700', statusText = 'В процессе';
-            
-            if (record.completed) {
-                if (record.test1Score === 2 && record.test2Score === 2 && record.test3Score === 2 && record.test4Score === 2 && record.test5Score === 2) {
-                    status = '✅'; statusColor = '#34A853'; statusText = 'Успешно';
-                } else {
-                    status = '❌'; statusColor = '#EA4335'; statusText = 'Не пройден';
-                }
-            }
-            
-            const test1Score = record.test1Score || 0;
-            const test2Score = record.test2Score || 0;
-            const test3Score = record.test3Score || 0;
-            const test4Score = record.test4Score || 0;
-            const test5Score = record.test5Score || 0;
-            const totalErrors = record.totalErrors || 0;
-            
-            const test1Color = test1Score === 2 ? '#34A853' : test1Score > 0 ? '#FFB700' : '#EA4335';
-            const test2Color = test2Score === 2 ? '#34A853' : test2Score > 0 ? '#FFB700' : '#EA4335';
-            const test3Color = test3Score === 2 ? '#34A853' : test3Score > 0 ? '#FFB700' : '#EA4335';
-            const test4Color = test4Score === 2 ? '#34A853' : test4Score > 0 ? '#FFB700' : '#EA4335';
-            const test5Color = test5Score === 2 ? '#34A853' : test5Score > 0 ? '#FFB700' : '#EA4335';
-            const errorsColor = totalErrors === 0 ? '#34A853' : totalErrors <= 3 ? '#FFB700' : '#EA4335';
-            
-            html += `
-                <tr style="background-color: ${rowColor}; transition: background-color 0.3s;">
-                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #666;">${index + 1}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">${record.fullName || 'Не указано'}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">
-                        <span style="display: inline-block; padding: 5px 10px; background: #fff5f5; color: #E94A4E; border-radius: 20px; font-size: 13px; font-weight: 600;">${record.position || 'Не указана'}</span>
-                    </td>
-                    <td style="padding: 12px; border: 1px solid #ddd; color: #666;">${startTime}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; color: #666;">${endTime}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;"><span style="color: ${test1Color}; font-weight: bold; font-size: 1.1em;">${test1Score}/2</span></td>
-                    <td style="padding: 12px; border: 1px solid #ddd;"><span style="color: ${test2Color}; font-weight: bold; font-size: 1.1em;">${test2Score}/2</span></td>
-                    <td style="padding: 12px; border: 1px solid #ddd;"><span style="color: ${test3Color}; font-weight: bold; font-size: 1.1em;">${test3Score}/2</span></td>
-                    <td style="padding: 12px; border: 1px solid #ddd;"><span style="color: ${test4Color}; font-weight: bold; font-size: 1.1em;">${test4Score}/2</span></td>
-                    <td style="padding: 12px; border: 1px solid #ddd;"><span style="color: ${test5Color}; font-weight: bold; font-size: 1.1em;">${test5Score}/2</span></td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
-                        <span style="color: ${errorsColor}; font-weight: bold; font-size: 1.1em; display: inline-block; padding: 3px 10px; background: ${errorsColor}15; border-radius: 20px; border: 1px solid ${errorsColor}30;">
-                            ${totalErrors}
-                        </span>
-                    </td>
-                    <td style="padding: 12px; border: 1px solid #ddd;"><span style="color: ${statusColor}; font-weight: bold; display: flex; align-items: center; gap: 5px;">${status} ${statusText}</span></td>
-                </tr>`;
-        });
-        
-        html += `</tbody></table></div>`;
-        
-        // Статистика ошибок по тестам
-        let allErrorStats = {};
-        try {
-            const storedErrorStats = localStorage.getItem('errorStats');
-            if (storedErrorStats) {
-                allErrorStats = JSON.parse(storedErrorStats);
-            }
-        } catch (e) {
-            console.error('Ошибка при чтении статистики:', e);
-        }
 
-        // Агрегируем данные
-        const aggregatedErrors = { test1: 0, test2: 0, test3: 0, test4: 0, test5: 0, total: 0 };
-        Object.values(allErrorStats).forEach(stats => {
-            aggregatedErrors.test1 += stats.test1 || 0;
-            aggregatedErrors.test2 += stats.test2 || 0;
-            aggregatedErrors.test3 += stats.test3 || 0;
-            aggregatedErrors.test4 += stats.test4 || 0;
-            aggregatedErrors.test5 += stats.test5 || 0;
-            aggregatedErrors.total += stats.total || 0;
-        });
-
-        html += `
-            <div style="margin-top: 40px; padding: 25px; background: #f8f9fa; border-radius: 10px; border-left: 5px solid #E94A4E;">
-                <h3 style="color: #E94A4E; margin-bottom: 20px;">📊 Статистика ошибок по тестам</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">`;
-
-        const tests = [
-            { id: 'test1', name: 'Тест 1', errors: aggregatedErrors.test1 },
-            { id: 'test2', name: 'Тест 2', errors: aggregatedErrors.test2 },
-            { id: 'test3', name: 'Тест 3', errors: aggregatedErrors.test3 },
-            { id: 'test4', name: 'Тест 4', errors: aggregatedErrors.test4 },
-            { id: 'test5', name: 'Тест 5', errors: aggregatedErrors.test5 }
-        ];
-
-        tests.forEach(test => {
-            const percentage = allTrainings.length > 0 ? 
-                Math.round((test.errors / (allTrainings.length * 2)) * 100) : 0;
-            html += `
-                <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="font-size: 0.9em; color: #666;">${test.name}</div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                        <div style="font-size: 1.5em; font-weight: bold; color: ${test.errors > 0 ? '#EA4335' : '#34A853'};">${test.errors}</div>
-                        <div style="font-size: 0.9em; color: #666;">${percentage}% ошибок</div>
-                    </div>
-                </div>`;
-        });
-
-        html += `
-                </div>
-                <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px; border: 2px solid #E94A4E;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-size: 0.9em; color: #666;">Всего ошибок в системе</div>
-                            <div style="font-size: 2em; font-weight: bold; color: #E94A4E;">${aggregatedErrors.total}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 0.9em; color: #666;">Среднее на сотрудника</div>
-                            <div style="font-size: 1.5em; font-weight: bold; color: #666;">
-                                ${allTrainings.length > 0 ? (aggregatedErrors.total / allTrainings.length).toFixed(1) : '0'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        html += `
-            <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
-                <button onclick="exportToCSV()" style="padding: 12px 25px; background: #E94A4E; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.3s;">📥 <span>Экспорт в CSV</span></button>
-                <button onclick="exportToExcel()" style="padding: 12px 25px; background: #34A853; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.3s;">📊 <span>Экспорт в Excel</span></button>
-                <button onclick="clearAllData()" style="padding: 12px 25px; background: #ff4444; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.3s;">🗑️ <span>Очистить все данные</span></button>
-                <button onclick="showErrorStatistics()" style="padding: 12px 25px; background: #FFB700; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.3s;">📈 <span>Статистика ошибок</span></button>
-            </div>`;
-    }
-    
-    html += `
-        <div style="margin-top: 40px; text-align: center; padding-top: 20px; border-top: 1px solid #e0e0e0;">
-            <p style="color: #999; font-size: 0.9em;">Система обучения персонала • Всего записей в базе: ${allTrainings.length}</p>
-        </div>
-    </div>
-</div>`;
-    
-    const existingPanel = document.getElementById('admin-panel');
-    if (existingPanel) existingPanel.remove();
-    document.body.insertAdjacentHTML('beforeend', html);
-    
-    setTimeout(() => {
-        document.querySelectorAll('#admin-panel button').forEach(btn => {
-            if (!btn.onclick.toString().includes('closeAdminPanel')) {
-                btn.addEventListener('mouseenter', function() { 
-                    this.style.transform = 'translateY(-2px)'; 
-                    this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)'; 
-                });
-                btn.addEventListener('mouseleave', function() { 
-                    this.style.transform = 'translateY(0)'; 
-                    this.style.boxShadow = 'none'; 
-                });
-            }
-        });
-    }, 100);
-}
-        function closeAdminPanel() {
-            const panel = document.getElementById('admin-panel');
-            if (panel) panel.remove();
-        }
-function refreshAdminData() {
-    closeAdminPanel();
-    setTimeout(showAdminPanel, 100);
-}
-function exportToCSV() {
-    let allTrainings = [];
-    try {
-        const storedData = localStorage.getItem('trainingRecords');
-        if (storedData) allTrainings = JSON.parse(storedData);
-    } catch (e) {
-        console.error('Ошибка при чтении данных:', e);
-    }
-    if (allTrainings.length === 0) { showNotification('Нет данных для экспорта!', 'error'); return; }
-    
-    let csv = '№;ФИО;Должность;Дата начала;Дата завершения;Тест1;Тест2;Тест3;Тест4;Тест5;Ошибок всего;Статус\n';
-    
-    allTrainings.forEach((record, index) => {
-        const startTime = record.startTime ? new Date(record.startTime).toLocaleString('ru-RU') : 'Не указано';
-        const endTime = record.endTime ? new Date(record.endTime).toLocaleString('ru-RU') : 'Не завершено';
-        const test1Score = record.test1Score || 0;
-        const test2Score = record.test2Score || 0;
-        const test3Score = record.test3Score || 0;
-        const test4Score = record.test4Score || 0;
-        const test5Score = record.test5Score || 0;
-        const totalErrors = record.totalErrors || 0;
-        
-        const status = record.completed ? 
-            (test1Score === 2 && test2Score === 2 && test3Score === 2 && test4Score === 2 && test5Score === 2 ? 
-             'Успешно' : 'Не пройден') : 'В процессе';
-        
-        csv += `${index + 1};"${record.fullName || ''}";"${record.position || ''}";"${startTime}";"${endTime}";${test1Score}/2;${test2Score}/2;${test3Score}/2;${test4Score}/2;${test5Score}/2;${totalErrors};"${status}"\n`;
-    }); // Закрываем forEach здесь
-    
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.download = `обучение_сотрудников_${new Date().toISOString().slice(0,10)}.csv`;
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showNotification('CSV файл успешно скачан!', 'success');
-} // Закрываем функцию exportToCSV здесь
-function exportToExcel() {
-    showNotification('Для экспорта в Excel скачайте CSV файл и откройте его в Excel', 'info');
-    exportToCSV();
-}
-        function clearAllData() {
-            if (confirm('⚠️ ВНИМАНИЕ!\n\nВы уверены, что хотите удалить ВСЕ данные обучения?\nЭто действие нельзя отменить!')) {
-                const password = prompt('Введите пароль 1616 для подтверждения удаления:');
-                if (password === ADMIN_PASSWORD) {
-                    localStorage.removeItem('trainingRecords');
-                    localStorage.removeItem('lastUserName');
-                    showNotification('Все данные успешно удалены!', 'success');
-                    setTimeout(() => { closeAdminPanel(); setTimeout(showAdminPanel, 300); }, 1500);
-                } else {
-                    showNotification('Неверный пароль! Данные не удалены.', 'error');
-                }
-            }
-        }
-        function showNotification(message, type) {
-            document.querySelectorAll('.admin-notification').forEach(n => n.remove());
-            const colors = { success: '#34A853', error: '#EA4335', info: '#4a6fa5' };
-            const notification = document.createElement('div');
-            notification.className = 'admin-notification';
-            notification.style.cssText = `position: fixed; top: 20px; right: 20px; padding: 15px 25px; background: ${colors[type] || colors.info}; color: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 10001; animation: slideIn 0.3s ease; max-width: 400px; font-weight: 600; display: flex; align-items: center; gap: 10px;`;
-            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
-            notification.innerHTML = `${icons[type] || icons.info} <span>${message}</span>`;
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => { if (notification.parentNode) document.body.removeChild(notification); }, 300);
-            }, 3000);
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Админ-панель загружена');
-            console.log('Данные в localStorage:', localStorage.getItem('trainingRecords'));
-        });
-function showErrorStatistics() {
-    let allErrorStats = {};
-    try {
-        const storedErrorStats = localStorage.getItem('errorStats');
-        if (storedErrorStats) {
-            allErrorStats = JSON.parse(storedErrorStats);
-        }
-    } catch (e) {
-        console.error('Ошибка при чтении статистики:', e);
-    }
-    
-    let html = `
-        <div id="error-statistics-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10001; padding: 20px; overflow-y: auto;">
-            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 1000px; margin: 0 auto; position: relative;">
-                <button onclick="closeErrorStatistics()" style="position: absolute; top: 15px; right: 15px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
-                <h2 style="color: #E94A4E; margin-bottom: 25px;">📈 Детальная статистика ошибок</h2>
-    `;
-    
-    if (Object.keys(allErrorStats).length === 0) {
-        html += `
-            <div style="text-align: center; padding: 60px 20px;">
-                <p style="color: #666; font-size: 1.2em;">Статистика ошибок пока не собрана</p>
-            </div>
-        `;
-    } else {
-        // Сортируем по количеству ошибок (по убыванию)
-        const sortedStats = Object.entries(allErrorStats)
-            .sort((a, b) => b[1].total - a[1].total);
-        
-        html += `
-            <div style="overflow-x: auto; margin-bottom: 30px;">
-                <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
-                    <thead>
-                        <tr style="background: linear-gradient(to right, #E94A4E, #d63c40); color: white;">
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Сотрудник</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Должность</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 1</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 2</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 3</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 4</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 5</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Всего</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Дата</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        sortedStats.forEach(([name, stats], index) => {
-            const rowColor = index % 2 === 0 ? '#f8f9fa' : 'white';
-            const date = stats.timestamp ? new Date(stats.timestamp).toLocaleDateString('ru-RU') : 'Н/Д';
-            
-            html += `
-                <tr style="background-color: ${rowColor};">
-                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">${name}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">${stats.position || 'Н/Д'}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test1 > 0 ? '#EA4335' : '#34A853'}">${stats.test1 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test2 > 0 ? '#EA4335' : '#34A853'}">${stats.test2 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test3 > 0 ? '#EA4335' : '#34A853'}">${stats.test3 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test4 > 0 ? '#EA4335' : '#34A853'}">${stats.test4 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test5 > 0 ? '#EA4335' : '#34A853'}">${stats.test5 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: ${stats.total > 0 ? '#EA4335' : '#34A853'}">${stats.total || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">${date}</td>
-                </tr>
-            `;
-        });
-        
-        html += `</tbody></table></div>`;
-        
-        // График ошибок по тестам
-        const testNames = ['Тест 1', 'Тест 2', 'Тест 3', 'Тест 4', 'Тест 5'];
-        const testErrors = [aggregatedErrors.test1, aggregatedErrors.test2, aggregatedErrors.test3, aggregatedErrors.test4, aggregatedErrors.test5];
-        const maxErrors = Math.max(...testErrors);
-        
-        html += `
-            <div style="margin-top: 40px; padding: 25px; background: #f8f9fa; border-radius: 10px;">
-                <h3 style="color: #E94A4E; margin-bottom: 20px;">📉 Распределение ошибок по тестам</h3>
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-        `;
-        
-        testNames.forEach((name, index) => {
-            const errors = testErrors[index];
-            const percentage = maxErrors > 0 ? (errors / maxErrors) * 100 : 0;
-            const width = Math.max(10, percentage);
-            
-            html += `
-                <div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span style="font-weight: 600;">${name}</span>
-                        <span style="color: ${errors > 0 ? '#EA4335' : '#34A853'}; font-weight: bold;">${errors}</span>
-                    </div>
-                    <div style="height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;">
-                        <div style="height: 100%; width: ${width}%; background: linear-gradient(to right, #E94A4E, #FFB700); border-radius: 5px;"></div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += `</div></div>`;
-    }
-    
-    html += `
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', html);
-}
-
-function closeErrorStatistics() {
-    const modal = document.getElementById('error-statistics-modal');
-    if (modal) modal.remove();
-}   
-function showErrorStatistics() {
-    let allErrorStats = {};
-    try {
-        const storedErrorStats = localStorage.getItem('errorStats');
-        if (storedErrorStats) {
-            allErrorStats = JSON.parse(storedErrorStats);
-        }
-    } catch (e) {
-        console.error('Ошибка при чтении статистики:', e);
-    }
-    
-    // Получаем данные для aggregatedErrors
-    let aggregatedErrors = { test1: 0, test2: 0, test3: 0, test4: 0, test5: 0, total: 0 };
-    Object.values(allErrorStats).forEach(stats => {
-        aggregatedErrors.test1 += stats.test1 || 0;
-        aggregatedErrors.test2 += stats.test2 || 0;
-        aggregatedErrors.test3 += stats.test3 || 0;
-        aggregatedErrors.test4 += stats.test4 || 0;
-        aggregatedErrors.test5 += stats.test5 || 0;
-        aggregatedErrors.total += stats.total || 0;
+    // =========================
+    // ИНИЦИАЛИЗАЦИЯ
+    // =========================
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedName = localStorage.getItem('lastUserName');
+      if (savedName) document.getElementById('full-name').value = savedName;
+      setTimeout(() => { const nameInput = document.getElementById('full-name'); if (nameInput) nameInput.focus(); }, 300);
     });
-    
-    let html = `
-        <div id="error-statistics-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10001; padding: 20px; overflow-y: auto;">
-            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 1000px; margin: 0 auto; position: relative;">
-                <button onclick="closeErrorStatistics()" style="position: absolute; top: 15px; right: 15px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
-                <h2 style="color: #E94A4E; margin-bottom: 25px;">📈 Детальная статистика ошибок</h2>
-    `;
-    
-    if (Object.keys(allErrorStats).length === 0) {
-        html += `
-            <div style="text-align: center; padding: 60px 20px;">
-                <p style="color: #666; font-size: 1.2em;">Статистика ошибок пока не собрана</p>
+
+    // =========================
+    // АДМИН-ПАНЕЛЬ (упрощенная, но рабочая)
+    // =========================
+    const ADMIN_PASSWORD = "1616";
+
+    function showPasswordPrompt() {
+      let html = `
+        <div id="password-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; justify-content: center; align-items: center;">
+          <div style="background: white; padding: 40px; border-radius: 15px; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #E94A4E; margin-bottom: 20px;">🔐 Доступ к админ-панели</h2>
+            <p style="margin-bottom: 20px; color: #666;">Введите пароль для просмотра записей:</p>
+            <input type="password" id="admin-password-input" style="width: 100%; padding: 15px; font-size: 18px; border: 2px solid #E94A4E; border-radius: 8px; margin-bottom: 20px;" placeholder="Введите пароль">
+            <div id="password-error" style="color: #ff4444; margin-bottom: 15px; min-height: 20px;"></div>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+              <button onclick="checkAdminPassword()" style="padding: 12px 30px; background: #E94A4E; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600;">Войти</button>
+              <button onclick="closePasswordModal()" style="padding: 12px 30px; background: #ccc; color: #333; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600;">Отмена</button>
             </div>
-        `;
-    } else {
-        // Сортируем по количеству ошибок (по убыванию)
-        const sortedStats = Object.entries(allErrorStats)
-            .sort((a, b) => b[1].total - a[1].total);
-        
-        html += `
-            <div style="overflow-x: auto; margin-bottom: 30px;">
-                <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
-                    <thead>
-                        <tr style="background: linear-gradient(to right, #E94A4E, #d63c40); color: white;">
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Сотрудник</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Должность</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 1</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 2</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 3</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 4</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Тест 5</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Всего</th>
-                            <th style="padding: 15px; border: 1px solid #ddd; text-align: left;">Дата</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        sortedStats.forEach(([name, stats], index) => {
-            const rowColor = index % 2 === 0 ? '#f8f9fa' : 'white';
-            const date = stats.timestamp ? new Date(stats.timestamp).toLocaleDateString('ru-RU') : 'Н/Д';
-            
-            html += `
-                <tr style="background-color: ${rowColor};">
-                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">${name}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">${stats.position || 'Н/Д'}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test1 > 0 ? '#EA4335' : '#34A853'}">${stats.test1 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test2 > 0 ? '#EA4335' : '#34A853'}">${stats.test2 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test3 > 0 ? '#EA4335' : '#34A853'}">${stats.test3 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test4 > 0 ? '#EA4335' : '#34A853'}">${stats.test4 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: ${stats.test5 > 0 ? '#EA4335' : '#34A853'}">${stats.test5 || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: ${stats.total > 0 ? '#EA4335' : '#34A853'}">${stats.total || 0}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">${date}</td>
-                </tr>
-            `;
-        });
-        
-        html += `</tbody></table></div>`;
-        
-        // График ошибок по тестам
-        const testNames = ['Тест 1', 'Тест 2', 'Тест 3', 'Тест 4', 'Тест 5'];
-        const testErrors = [aggregatedErrors.test1, aggregatedErrors.test2, aggregatedErrors.test3, aggregatedErrors.test4, aggregatedErrors.test5];
-        const maxErrors = Math.max(...testErrors);
-        
-        html += `
-            <div style="margin-top: 40px; padding: 25px; background: #f8f9fa; border-radius: 10px;">
-                <h3 style="color: #E94A4E; margin-bottom: 20px;">📉 Распределение ошибок по тестам</h3>
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-        `;
-        
-        testNames.forEach((name, index) => {
-            const errors = testErrors[index];
-            const percentage = maxErrors > 0 ? (errors / maxErrors) * 100 : 0;
-            const width = Math.max(10, percentage);
-            
-            html += `
-                <div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span style="font-weight: 600;">${name}</span>
-                        <span style="color: ${errors > 0 ? '#EA4335' : '#34A853'}; font-weight: bold;">${errors}</span>
-                    </div>
-                    <div style="height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;">
-                        <div style="height: 100%; width: ${width}%; background: linear-gradient(to right, #E94A4E, #FFB700); border-radius: 5px;"></div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += `</div></div>`;
+          </div>
+        </div>`;
+
+      const existingModal = document.getElementById('password-modal');
+      if (existingModal) existingModal.remove();
+      document.body.insertAdjacentHTML('beforeend', html);
+
+      setTimeout(() => {
+        const input = document.getElementById('admin-password-input');
+        if (input) {
+          input.focus();
+          input.addEventListener('input', function() { this.value = this.value.replace(/\D/g, ''); });
+        }
+      }, 100);
     }
-    
-    html += `
+
+    function closePasswordModal() {
+      const modal = document.getElementById('password-modal');
+      if (modal) modal.remove();
+    }
+
+    function checkAdminPassword() {
+      const input = document.getElementById('admin-password-input');
+      const errorDiv = document.getElementById('password-error');
+      if (!input) return;
+
+      const enteredPassword = input.value;
+      if (enteredPassword === ADMIN_PASSWORD) {
+        closePasswordModal();
+        showAdminPanel();
+      } else {
+        if (errorDiv) errorDiv.textContent = 'Неверный пароль! Попробуйте снова.';
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function closeAdminPanel() {
+      const panel = document.getElementById('admin-panel');
+      if (panel) panel.remove();
+    }
+
+    function exportToCSV() {
+      let allTrainings = [];
+      try {
+        const storedData = localStorage.getItem('trainingRecords');
+        if (storedData) allTrainings = JSON.parse(storedData);
+      } catch (e) {}
+
+      if (allTrainings.length === 0) { alert('Нет данных для экспорта'); return; }
+
+      let csv = '№;ФИО;Должность;Дата начала;Дата завершения;Ошибок;Прогресс кассира;Статус\n';
+      allTrainings.forEach((r, i) => {
+        const startTime = r.startTime ? new Date(r.startTime).toLocaleString('ru-RU') : '';
+        const endTime = r.endTime ? new Date(r.endTime).toLocaleString('ru-RU') : '';
+        const errors = r.totalErrors || 0;
+
+        let cashierProgress = '';
+        if (r.position === 'Кассир') {
+          const passed = (r.cashierScores || []).filter(x => x && x.passed).length;
+          cashierProgress = `${passed}/${cashierModules.length}`;
+        } else {
+          cashierProgress = '-';
+        }
+
+        const status = r.completed ? 'Завершено' : 'В процессе';
+        csv += `${i+1};"${r.fullName || ''}";"${r.position || ''}";"${startTime}";"${endTime}";${errors};"${cashierProgress}";"${status}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = `обучение_сотрудников_${new Date().toISOString().slice(0,10)}.csv`;
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function clearAllData() {
+      if (!confirm('Удалить ВСЕ данные?')) return;
+      const password = prompt('Введите пароль 1616:');
+      if (password !== ADMIN_PASSWORD) { alert('Неверный пароль'); return; }
+      localStorage.removeItem('trainingRecords');
+      localStorage.removeItem('lastUserName');
+      alert('Данные удалены');
+      closeAdminPanel();
+    }
+
+    function showAdminPanel() {
+      let allTrainings = [];
+      try {
+        const storedData = localStorage.getItem('trainingRecords');
+        if (storedData) allTrainings = JSON.parse(storedData);
+      } catch (e) {}
+
+      let html = `
+        <div id="admin-panel" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; padding: 20px; overflow-y: auto;">
+          <div style="background: white; padding: 30px; border-radius: 15px; max-width: 1200px; margin: 0 auto; position: relative;">
+            <button onclick="closeAdminPanel()" style="position: absolute; top: 15px; right: 15px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer;">×</button>
+            <h2 style="color: #E94A4E; margin-bottom: 20px;">📋 Все записи обучения</h2>
+
+            <div style="display:flex; gap:10px; flex-wrap: wrap; margin-bottom: 20px;">
+              <button onclick="exportToCSV()" style="padding: 10px 18px; background:#E94A4E; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Экспорт CSV</button>
+              <button onclick="clearAllData()" style="padding: 10px 18px; background:#ff4444; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Очистить данные</button>
             </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', html);
-}
+      `;
 
-function closeErrorStatistics() {
-    const modal = document.getElementById('error-statistics-modal');
-    if (modal) modal.remove();
-}
- </script>
+      if (allTrainings.length === 0) {
+        html += `<p style="color:#666;">Записей пока нет</p></div></div>`;
+        const existing = document.getElementById('admin-panel');
+        if (existing) existing.remove();
+        document.body.insertAdjacentHTML('beforeend', html);
+        return;
+      }
+
+      html += `
+        <div style="overflow-x:auto; border:1px solid #e0e0e0; border-radius:10px;">
+          <table style="width:100%; border-collapse:collapse; min-width: 980px;">
+            <thead>
+              <tr style="background: linear-gradient(to right, #E94A4E, #d63c40); color: white;">
+                <th style="padding: 12px; border: 1px solid #ddd; text-align:left;">№</th>
+                <th style="padding: 12px; border: 1px solid #ddd; text-align:left;">ФИО</th>
+                <th style="padding: 12px; border: 1px solid #ddd; text-align:left;">Должность</th>
+                <th style="padding: 12px; border: 1px solid #ddd; text-align:left;">Начало</th>
+                <th style="padding: 12px; border: 1px solid #ddd; text-align:left;">Завершение</th>
+                <th style="padding: 12px; border: 1px solid #ddd; text-align:left;">Ошибок</th>
+                <th style="padding: 12px; border: 1px solid #ddd; text-align:left;">Прогресс кассира</th>
+                <th style="padding: 12px; border: 1px solid #ddd; text-align:left;">Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      allTrainings.forEach((r, i) => {
+        const startTime = r.startTime ? new Date(r.startTime).toLocaleString('ru-RU') : '';
+        const endTime = r.endTime ? new Date(r.endTime).toLocaleString('ru-RU') : '';
+        const errors = r.totalErrors || 0;
+
+        let cashierProgress = '—';
+        if (r.position === 'Кассир') {
+          const passed = (r.cashierScores || []).filter(x => x && x.passed).length;
+          cashierProgress = `${passed}/${cashierModules.length}`;
+        }
+
+        const status = r.completed ? '✅ Завершено' : '⏳ В процессе';
+
+        html += `
+          <tr style="background:${i%2===0?'#f8f9fa':'#fff'};">
+            <td style="padding: 12px; border:1px solid #ddd;">${i+1}</td>
+            <td style="padding: 12px; border:1px solid #ddd; font-weight:600;">${r.fullName || ''}</td>
+            <td style="padding: 12px; border:1px solid #ddd;">${r.position || ''}</td>
+            <td style="padding: 12px; border:1px solid #ddd; color:#666;">${startTime}</td>
+            <td style="padding: 12px; border:1px solid #ddd; color:#666;">${endTime}</td>
+            <td style="padding: 12px; border:1px solid #ddd; font-weight:700; color:${errors===0?'#34A853':'#E94A4E'};">${errors}</td>
+            <td style="padding: 12px; border:1px solid #ddd;">${cashierProgress}</td>
+            <td style="padding: 12px; border:1px solid #ddd;">${status}</td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table></div></div></div>`;
+
+      const existing = document.getElementById('admin-panel');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', html);
+    }
+
+    // Enter в модалке пароля
+    document.addEventListener('keydown', function(e) {
+      const passwordInput = document.getElementById('admin-password-input');
+      if (passwordInput && e.key === 'Enter') checkAdminPassword();
+    });
+  </script>
 </body>
-
 </html>
-
-
